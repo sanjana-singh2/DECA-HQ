@@ -16,6 +16,7 @@ import ResourceLibraryScreen from '../screens/resources/ResourceLibraryScreen';
 import ResourceDetailScreen from '../screens/resources/ResourceDetailScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 import AttendanceScreen from '../screens/attendance/AttendanceScreen';
+import QRScannerScreen from '../screens/attendance/QRScannerScreen';
 import VolunteerHoursScreen from '../screens/volunteer/VolunteerHoursScreen';
 import SubmitVolunteerHoursScreen from '../screens/volunteer/SubmitVolunteerHoursScreen';
 import ApprovalQueueScreen from '../screens/volunteer/ApprovalQueueScreen';
@@ -30,6 +31,7 @@ function HomeStack() {
     <Stack.Navigator>
       <Stack.Screen name="Dashboard" component={DashboardScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Attendance" component={AttendanceScreen} options={{ title: 'Attendance' }} />
+      <Stack.Screen name="QRScanner" component={QRScannerScreen} options={{ title: 'Scan QR Code', headerShown: false }} />
       <Stack.Screen name="VolunteerHours" component={VolunteerHoursScreen} options={{ title: 'Volunteer Hours' }} />
       <Stack.Screen name="SubmitHours" component={SubmitVolunteerHoursScreen} options={{ title: 'Submit Hours' }} />
       <Stack.Screen name="ApprovalQueue" component={ApprovalQueueScreen} options={{ title: 'Approval Queue' }} />
