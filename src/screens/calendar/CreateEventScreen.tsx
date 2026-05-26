@@ -8,22 +8,27 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createEventSchema, CreateEventFormData } from '../../utils/validators';
 import { createEvent } from '../../services/eventsService';
 import { useAuth } from '../../hooks/useAuth';
+import { Feather } from '@expo/vector-icons';
 import { EventType } from '../../types';
 import { EventTypeColors } from '../../constants/colors';
 
 const EVENT_TYPES: EventType[] = ['meeting', 'competition', 'social', 'deadline'];
-const TYPE_ICONS: Record<EventType, string> = {
-  meeting: '📋',
-  competition: '🏆',
-  social: '🎉',
-  deadline: '⏰',
+const TYPE_ICONS: Record<EventType, keyof typeof Feather.glyphMap> = {
+  meeting:     'clipboard',
+  competition: 'award',
+  social:      'smile',
+  deadline:    'alert-circle',
 };
+
+const LABEL = { color: '#A09A94', fontSize: 11, fontWeight: '600' as const, letterSpacing: 0.8, textTransform: 'uppercase' as const, marginBottom: 8 };
+const INPUT = { backgroundColor: '#FDFAF5', borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 14, color: '#1A1612', fontSize: 14 };
 
 export default function CreateEventScreen() {
   const navigation = useNavigation();
@@ -60,68 +65,73 @@ export default function CreateEventScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-white dark:bg-slate-900" keyboardShouldPersistTaps="handled">
-      <View className="px-6 py-6">
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F0E8' }} edges={['bottom']}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }} keyboardShouldPersistTaps="handled">
+
         {/* Event Type */}
-        <Text className="text-slate-700 dark:text-slate-300 text-sm font-medium mb-2">
-          Event Type
-        </Text>
-        <View className="flex-row flex-wrap gap-2 mb-6">
-          {EVENT_TYPES.map(type => (
-            <TouchableOpacity
-              key={type}
-              onPress={() => setSelectedType(type)}
-              className={`flex-row items-center px-4 py-2.5 rounded-xl border ${
-                selectedType === type
-                  ? 'border-deca-blue-600 bg-deca-blue-50 dark:bg-deca-blue-900/20'
-                  : 'border-slate-200 dark:border-slate-700'
-              }`}
-            >
-              <Text className="mr-1.5">{TYPE_ICONS[type]}</Text>
-              <Text
-                className={`text-sm font-medium capitalize ${
-                  selectedType === type
-                    ? 'text-deca-blue-600 dark:text-deca-blue-400'
-                    : 'text-slate-600 dark:text-slate-400'
-                }`}
-              >
-                {type}
-              </Text>
-            </TouchableOpacity>
-          ))}
+        <View style={{ marginBottom: 24 }}>
+          <Text style={LABEL}>Event Type</Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            {EVENT_TYPES.map(type => {
+              const accent = EventTypeColors[type];
+              const active = selectedType === type;
+              return (
+                <TouchableOpacity
+                  key={type}
+                  onPress={() => setSelectedType(type)}
+                  activeOpacity={0.8}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    paddingHorizontal: 14,
+                    paddingVertical: 10,
+                    borderRadius: 12,
+                    borderWidth: 1.5,
+                    borderColor: active ? accent : '#EDE8DF',
+                    backgroundColor: active ? accent + '18' : '#FDFAF5',
+                  }}
+                >
+                  <Feather name={TYPE_ICONS[type]} size={14} color={active ? accent : '#6B6560'} style={{ marginRight: 6 }} />
+                  <Text style={{ fontSize: 13, fontWeight: '500', textTransform: 'capitalize', color: active ? accent : '#6B6560' }}>
+                    {type}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
         </View>
 
         {/* Title */}
-        <View className="mb-4">
-          <Text className="text-slate-700 dark:text-slate-300 text-sm font-medium mb-2">Title *</Text>
+        <View style={{ marginBottom: 20 }}>
+          <Text style={LABEL}>Title</Text>
           <Controller
             control={control}
             name="title"
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
-                className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 text-slate-900 dark:text-white"
+                style={INPUT}
                 placeholder="e.g. Chapter Meeting"
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor="#C4BEB8"
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
               />
             )}
           />
-          {errors.title && <Text className="text-red-500 text-xs mt-1">{errors.title.message}</Text>}
+          {errors.title && <Text style={{ color: '#C96F6F', fontSize: 12, marginTop: 6 }}>{errors.title.message}</Text>}
         </View>
 
         {/* Description */}
-        <View className="mb-4">
-          <Text className="text-slate-700 dark:text-slate-300 text-sm font-medium mb-2">Description</Text>
+        <View style={{ marginBottom: 20 }}>
+          <Text style={LABEL}>Description</Text>
           <Controller
             control={control}
             name="description"
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
-                className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 text-slate-900 dark:text-white"
-                placeholder="Add details about this event..."
-                placeholderTextColor="#94a3b8"
+                style={[INPUT, { minHeight: 80, textAlignVertical: 'top' }]}
+                placeholder="Add details about this event…"
+                placeholderTextColor="#C4BEB8"
                 multiline
                 numberOfLines={3}
                 onBlur={onBlur}
@@ -133,16 +143,16 @@ export default function CreateEventScreen() {
         </View>
 
         {/* Location */}
-        <View className="mb-6">
-          <Text className="text-slate-700 dark:text-slate-300 text-sm font-medium mb-2">Location</Text>
+        <View style={{ marginBottom: 24 }}>
+          <Text style={LABEL}>Location</Text>
           <Controller
             control={control}
             name="location"
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
-                className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 text-slate-900 dark:text-white"
+                style={INPUT}
                 placeholder="e.g. Room 204 or Zoom"
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor="#C4BEB8"
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
@@ -151,25 +161,27 @@ export default function CreateEventScreen() {
           />
         </View>
 
-        {/* Note about dates */}
-        <View className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 mb-6">
-          <Text className="text-blue-600 dark:text-blue-400 text-xs">
-            ℹ️ Date/time picker integration requires a native date picker library. Set startTime and endTime programmatically or integrate @react-native-community/datetimepicker.
+        {/* Date picker note */}
+        <View style={{ backgroundColor: '#F0EFF9', borderRadius: 14, padding: 14, marginBottom: 24 }}>
+          <Text style={{ color: '#756FC9', fontSize: 12 }}>
+            ℹ️ Date/time fields are pre-filled with defaults. Integrate a date picker for full control.
           </Text>
         </View>
 
         <TouchableOpacity
           onPress={handleSubmit(onSubmit)}
           disabled={loading}
-          className="bg-deca-blue-600 rounded-xl py-4 items-center"
+          activeOpacity={0.85}
+          style={{ backgroundColor: '#756FC9', borderRadius: 16, paddingVertical: 16, alignItems: 'center' }}
         >
           {loading ? (
-            <ActivityIndicator color="white" />
+            <ActivityIndicator color="#FDFAF5" />
           ) : (
-            <Text className="text-white font-semibold text-base">Create Event</Text>
+            <Text style={{ color: '#FDFAF5', fontWeight: '600', fontSize: 15 }}>Create Event</Text>
           )}
         </TouchableOpacity>
-      </View>
-    </ScrollView>
+        <View style={{ height: 24 }} />
+      </ScrollView>
+    </SafeAreaView>
   );
 }

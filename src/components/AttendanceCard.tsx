@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { Attendance } from '../types';
 import { formatTimestampWithTime } from '../utils/formatters';
 
@@ -9,21 +10,22 @@ interface Props {
 }
 
 export default function AttendanceCard({ attendance, eventTitle }: Props) {
+  const icon = attendance.method === 'qr' ? 'camera' : 'edit-2';
   return (
-    <View className="bg-white dark:bg-slate-800 rounded-2xl p-4 mb-3 flex-row items-center border border-slate-100 dark:border-slate-700">
-      <View className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900 items-center justify-center mr-4">
-        <Text style={{ fontSize: 18 }}>✅</Text>
+    <View style={{ backgroundColor: '#FDFAF5', borderRadius: 16, padding: 16, marginBottom: 10, flexDirection: 'row', alignItems: 'center' }}>
+      <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: '#E3E2F5', alignItems: 'center', justifyContent: 'center', marginRight: 14 }}>
+        <Feather name={icon} size={18} color="#756FC9" />
       </View>
-      <View className="flex-1">
-        <Text className="text-slate-900 dark:text-white font-semibold text-sm mb-0.5">
+      <View style={{ flex: 1 }}>
+        <Text style={{ color: '#1A1612', fontWeight: '600', fontSize: 13, marginBottom: 3 }} numberOfLines={1}>
           {eventTitle}
         </Text>
-        <Text className="text-slate-500 dark:text-slate-400 text-xs">
+        <Text style={{ color: '#A09A94', fontSize: 12 }}>
           {formatTimestampWithTime(attendance.timestamp)}
         </Text>
       </View>
-      <View className="bg-slate-100 dark:bg-slate-700 rounded-full px-2 py-0.5">
-        <Text className="text-slate-500 dark:text-slate-400 text-xs capitalize">
+      <View style={{ backgroundColor: '#E3E2F5', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 3 }}>
+        <Text style={{ color: '#756FC9', fontSize: 11, fontWeight: '500', textTransform: 'capitalize' }}>
           {attendance.method}
         </Text>
       </View>

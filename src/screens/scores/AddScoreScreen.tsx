@@ -8,14 +8,18 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { addScoreSchema, AddScoreFormData } from '../../utils/validators';
 import { addScore } from '../../services/scoresService';
 import { useAuth } from '../../hooks/useAuth';
+import { Feather } from '@expo/vector-icons';
 import { DECA_EVENT_CATEGORIES } from '../../constants/config';
 import { ScoreType } from '../../types';
+
+const LABEL = { color: '#A09A94', fontSize: 11, fontWeight: '600' as const, letterSpacing: 0.8, textTransform: 'uppercase' as const, marginBottom: 8 };
 
 export default function AddScoreScreen() {
   const navigation = useNavigation();
@@ -45,82 +49,94 @@ export default function AddScoreScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-white dark:bg-slate-900" keyboardShouldPersistTaps="handled">
-      <View className="px-6 py-6">
-        {/* Score Type */}
-        <View className="mb-6">
-          <Text className="text-slate-700 dark:text-slate-300 text-sm font-medium mb-2">
-            Score Type
-          </Text>
-          <View className="flex-row gap-3">
-            {(['practice', 'competition'] as ScoreType[]).map(type => (
-              <TouchableOpacity
-                key={type}
-                onPress={() => setScoreType(type)}
-                className={`flex-1 py-3 rounded-xl border items-center ${
-                  scoreType === type
-                    ? 'bg-deca-blue-600 border-deca-blue-600'
-                    : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800'
-                }`}
-              >
-                <Text className={`font-medium text-sm capitalize ${scoreType === type ? 'text-white' : 'text-slate-600 dark:text-slate-400'}`}>
-                  {type === 'competition' ? '🏆 ' : '📝 '}{type}
-                </Text>
-              </TouchableOpacity>
-            ))}
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F0E8' }} edges={['bottom']}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }} keyboardShouldPersistTaps="handled">
+
+        {/* Score Type Toggle */}
+        <View style={{ marginBottom: 24 }}>
+          <Text style={LABEL}>Score Type</Text>
+          <View style={{ flexDirection: 'row', gap: 10 }}>
+            {(['practice', 'competition'] as ScoreType[]).map(type => {
+              const active = scoreType === type;
+              return (
+                <TouchableOpacity
+                  key={type}
+                  onPress={() => setScoreType(type)}
+                  activeOpacity={0.85}
+                  style={{
+                    flex: 1,
+                    paddingVertical: 13,
+                    borderRadius: 14,
+                    alignItems: 'center',
+                    backgroundColor: active ? '#756FC9' : '#FDFAF5',
+                    borderWidth: 1,
+                    borderColor: active ? '#756FC9' : '#EDE8DF',
+                  }}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Feather name={type === 'competition' ? 'award' : 'edit-3'} size={14} color={active ? '#FDFAF5' : '#6B6560'} />
+                    <Text style={{ fontWeight: '600', fontSize: 13, textTransform: 'capitalize', color: active ? '#FDFAF5' : '#6B6560' }}>{type}</Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </View>
 
-        {/* Category */}
-        <View className="mb-4">
-          <Text className="text-slate-700 dark:text-slate-300 text-sm font-medium mb-2">
-            DECA Event Category *
-          </Text>
+        {/* DECA Event Category */}
+        <View style={{ marginBottom: 24 }}>
+          <Text style={LABEL}>DECA Event Category</Text>
           <ScrollView
-            className="max-h-40 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800"
+            style={{ maxHeight: 160, backgroundColor: '#FDFAF5', borderRadius: 14, borderWidth: 1, borderColor: '#EDE8DF' }}
             nestedScrollEnabled
           >
-            {DECA_EVENT_CATEGORIES.map(cat => (
-              <TouchableOpacity
-                key={cat}
-                onPress={() => {
-                  setSelectedCategory(cat);
-                  setValue('eventCategory', cat);
-                }}
-                className={`px-4 py-3 border-b border-slate-100 dark:border-slate-700 ${
-                  selectedCategory === cat ? 'bg-deca-blue-50 dark:bg-deca-blue-900/20' : ''
-                }`}
-              >
-                <Text
-                  className={`text-sm ${
-                    selectedCategory === cat
-                      ? 'text-deca-blue-600 dark:text-deca-blue-400 font-medium'
-                      : 'text-slate-700 dark:text-slate-300'
-                  }`}
+            {DECA_EVENT_CATEGORIES.map((cat, idx) => {
+              const active = selectedCategory === cat;
+              return (
+                <TouchableOpacity
+                  key={cat}
+                  onPress={() => { setSelectedCategory(cat); setValue('eventCategory', cat); }}
+                  activeOpacity={0.7}
+                  style={{
+                    paddingHorizontal: 16,
+                    paddingVertical: 13,
+                    borderBottomWidth: idx < DECA_EVENT_CATEGORIES.length - 1 ? 1 : 0,
+                    borderBottomColor: '#EDE8DF',
+                    backgroundColor: active ? '#F0EFF9' : 'transparent',
+                  }}
                 >
-                  {cat}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <Text style={{ fontSize: 13, color: active ? '#756FC9' : '#1A1612', fontWeight: active ? '600' : '400' }}>
+                    {cat}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </ScrollView>
-          {errors.eventCategory && (
-            <Text className="text-red-500 text-xs mt-1">{errors.eventCategory.message}</Text>
-          )}
+          {errors.eventCategory ? <Text style={{ color: '#C96F6F', fontSize: 12, marginTop: 6 }}>{errors.eventCategory.message}</Text> : null}
         </View>
 
         {/* Score */}
-        <View className="mb-4">
-          <Text className="text-slate-700 dark:text-slate-300 text-sm font-medium mb-2">
-            Score (0–100) *
-          </Text>
+        <View style={{ marginBottom: 24 }}>
+          <Text style={LABEL}>Score (0–100)</Text>
           <Controller
             control={control}
             name="score"
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
-                className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 text-slate-900 dark:text-white text-2xl font-bold text-center"
+                style={{
+                  backgroundColor: '#FDFAF5',
+                  borderWidth: 1,
+                  borderColor: '#EDE8DF',
+                  borderRadius: 14,
+                  paddingHorizontal: 16,
+                  paddingVertical: 14,
+                  color: '#1A1612',
+                  fontSize: 32,
+                  fontFamily: 'DMSerifDisplay_400Regular',
+                  textAlign: 'center',
+                }}
                 placeholder="85"
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor="#C4BEB8"
                 keyboardType="numeric"
                 onBlur={onBlur}
                 onChangeText={v => onChange(parseFloat(v) || 0)}
@@ -128,22 +144,31 @@ export default function AddScoreScreen() {
               />
             )}
           />
-          {errors.score && <Text className="text-red-500 text-xs mt-1">{errors.score.message}</Text>}
+          {errors.score ? <Text style={{ color: '#C96F6F', fontSize: 12, marginTop: 6 }}>{errors.score.message}</Text> : null}
         </View>
 
         {/* Notes */}
-        <View className="mb-6">
-          <Text className="text-slate-700 dark:text-slate-300 text-sm font-medium mb-2">
-            Notes (optional)
-          </Text>
+        <View style={{ marginBottom: 28 }}>
+          <Text style={LABEL}>Notes (optional)</Text>
           <Controller
             control={control}
             name="notes"
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
-                className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 text-slate-900 dark:text-white"
-                placeholder="Any notes about this score..."
-                placeholderTextColor="#94a3b8"
+                style={{
+                  backgroundColor: '#FDFAF5',
+                  borderWidth: 1,
+                  borderColor: '#EDE8DF',
+                  borderRadius: 14,
+                  paddingHorizontal: 16,
+                  paddingVertical: 14,
+                  color: '#1A1612',
+                  fontSize: 14,
+                  minHeight: 80,
+                  textAlignVertical: 'top',
+                }}
+                placeholder="Any notes about this score…"
+                placeholderTextColor="#C4BEB8"
                 multiline
                 numberOfLines={3}
                 onBlur={onBlur}
@@ -157,15 +182,17 @@ export default function AddScoreScreen() {
         <TouchableOpacity
           onPress={handleSubmit(onSubmit)}
           disabled={loading}
-          className="bg-deca-blue-600 rounded-xl py-4 items-center"
+          activeOpacity={0.85}
+          style={{ backgroundColor: '#756FC9', borderRadius: 16, paddingVertical: 16, alignItems: 'center' }}
         >
           {loading ? (
-            <ActivityIndicator color="white" />
+            <ActivityIndicator color="#FDFAF5" />
           ) : (
-            <Text className="text-white font-semibold text-base">Save Score</Text>
+            <Text style={{ color: '#FDFAF5', fontWeight: '600', fontSize: 15 }}>Save Score</Text>
           )}
         </TouchableOpacity>
-      </View>
-    </ScrollView>
+        <View style={{ height: 24 }} />
+      </ScrollView>
+    </SafeAreaView>
   );
 }

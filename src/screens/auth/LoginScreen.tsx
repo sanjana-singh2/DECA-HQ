@@ -9,6 +9,7 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useForm, Controller } from 'react-hook-form';
@@ -24,11 +25,7 @@ export default function LoginScreen() {
   const { login, isLoading, error } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormData>({
+  const { control, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
 
@@ -39,60 +36,52 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1 bg-slate-50 dark:bg-slate-950"
+      style={{ flex: 1, backgroundColor: '#F5F0E8' }}
     >
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+        contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
       >
-        <View
-          className="px-6 py-12 w-full"
-          style={{ maxWidth: 440, alignSelf: 'center' }}
-        >
-          {/* Brand mark */}
-          <View className="items-center mb-10">
-            <View className="w-14 h-14 bg-deca-blue-600 rounded-2xl items-center justify-center mb-4">
-              <Text
-                style={{
-                  fontSize: 18,
-                  fontWeight: '800',
-                  color: 'white',
-                  letterSpacing: 1.5,
-                }}
-              >
-                HQ
-              </Text>
-            </View>
-            <Text className="text-slate-900 dark:text-white text-2xl font-bold tracking-tight">
+        {/* Hero gradient */}
+        <LinearGradient
+          colors={['#D4D3ED', '#C5C8E8', '#CBBFE8']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{ height: 240 }}
+        />
+
+        {/* Form area */}
+        <View style={{ maxWidth: 440, width: '100%', alignSelf: 'center' }}
+          className="px-6 pt-8 pb-12 flex-1">
+
+          {/* Wordmark */}
+          <View className="mb-8">
+            <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 36, color: '#1A1612' }}>
               DECA HQ
             </Text>
-            <Text className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+            <Text style={{ color: '#A09A94', fontSize: 13, marginTop: 4 }}>
               Sign in to your chapter
             </Text>
           </View>
 
-          {/* Error banner */}
           {error ? (
-            <View className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-3.5 mb-5">
-              <Text className="text-red-600 dark:text-red-400 text-sm">
-                {error}
-              </Text>
+            <View style={{ backgroundColor: '#FEF2F2', borderColor: '#FECACA', borderWidth: 1 }}
+              className="rounded-xl p-3.5 mb-5">
+              <Text style={{ color: '#C96F6F', fontSize: 13 }}>{error}</Text>
             </View>
           ) : null}
 
           {/* Email */}
           <View className="mb-4">
-            <Text className="text-slate-700 dark:text-slate-300 text-sm font-medium mb-1.5">
-              Email
+            <Text style={{ color: '#6B6560', fontSize: 12, fontWeight: '500', marginBottom: 6, letterSpacing: 0.4 }}>
+              EMAIL
             </Text>
-            <Controller
-              control={control}
-              name="email"
+            <Controller control={control} name="email"
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextInput
-                  className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 text-slate-900 dark:text-white text-base"
+                  style={{ backgroundColor: '#FDFAF5', borderColor: '#EDE8DF', borderWidth: 1, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14, color: '#1A1612', fontSize: 15 }}
                   placeholder="you@school.edu"
-                  placeholderTextColor="#94a3b8"
+                  placeholderTextColor="#C4BEB8"
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoComplete="email"
@@ -102,27 +91,21 @@ export default function LoginScreen() {
                 />
               )}
             />
-            {errors.email ? (
-              <Text className="text-red-500 text-xs mt-1">
-                {errors.email.message}
-              </Text>
-            ) : null}
+            {errors.email ? <Text style={{ color: '#C96F6F', fontSize: 11, marginTop: 4 }}>{errors.email.message}</Text> : null}
           </View>
 
           {/* Password */}
-          <View className="mb-1">
-            <Text className="text-slate-700 dark:text-slate-300 text-sm font-medium mb-1.5">
-              Password
+          <View className="mb-2">
+            <Text style={{ color: '#6B6560', fontSize: 12, fontWeight: '500', marginBottom: 6, letterSpacing: 0.4 }}>
+              PASSWORD
             </Text>
             <View>
-              <Controller
-                control={control}
-                name="password"
+              <Controller control={control} name="password"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <TextInput
-                    className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 text-slate-900 dark:text-white text-base pr-16"
+                    style={{ backgroundColor: '#FDFAF5', borderColor: '#EDE8DF', borderWidth: 1, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14, paddingRight: 60, color: '#1A1612', fontSize: 15 }}
                     placeholder="••••••••"
-                    placeholderTextColor="#94a3b8"
+                    placeholderTextColor="#C4BEB8"
                     secureTextEntry={!showPassword}
                     autoComplete="password"
                     onBlur={onBlur}
@@ -133,62 +116,48 @@ export default function LoginScreen() {
               />
               <TouchableOpacity
                 onPress={() => setShowPassword(v => !v)}
-                className="absolute right-4 top-0 bottom-0 justify-center"
+                style={{ position: 'absolute', right: 16, top: 0, bottom: 0, justifyContent: 'center' }}
               >
-                <Text className="text-slate-400 text-sm font-medium">
+                <Text style={{ color: '#A09A94', fontSize: 12, fontWeight: '500' }}>
                   {showPassword ? 'Hide' : 'Show'}
                 </Text>
               </TouchableOpacity>
             </View>
-            {errors.password ? (
-              <Text className="text-red-500 text-xs mt-1">
-                {errors.password.message}
-              </Text>
-            ) : null}
+            {errors.password ? <Text style={{ color: '#C96F6F', fontSize: 11, marginTop: 4 }}>{errors.password.message}</Text> : null}
           </View>
 
-          {/* Forgot password */}
+          {/* Forgot */}
           <TouchableOpacity
             onPress={() => navigation.navigate('ForgotPassword')}
-            className="self-end mb-6 mt-2"
+            style={{ alignSelf: 'flex-end', marginBottom: 28, marginTop: 8 }}
           >
-            <Text className="text-deca-blue-600 dark:text-deca-blue-400 text-sm font-medium">
-              Forgot password?
-            </Text>
+            <Text style={{ color: '#756FC9', fontSize: 13, fontWeight: '500' }}>Forgot password?</Text>
           </TouchableOpacity>
 
-          {/* Sign in button */}
+          {/* Sign in */}
           <TouchableOpacity
             onPress={handleSubmit(onSubmit)}
             disabled={isLoading}
-            className="bg-deca-blue-600 rounded-xl py-4 items-center"
-            style={{ opacity: isLoading ? 0.7 : 1 }}
+            style={{ backgroundColor: '#756FC9', borderRadius: 14, paddingVertical: 16, alignItems: 'center', opacity: isLoading ? 0.7 : 1 }}
           >
-            {isLoading ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <Text className="text-white font-semibold text-base">
-                Sign In
-              </Text>
-            )}
+            {isLoading
+              ? <ActivityIndicator color="#FDFAF5" />
+              : <Text style={{ color: '#FDFAF5', fontWeight: '600', fontSize: 15 }}>Sign In</Text>
+            }
           </TouchableOpacity>
 
           {/* Divider */}
-          <View className="flex-row items-center my-6">
-            <View className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
-            <Text className="text-slate-400 text-xs px-3">or</Text>
-            <View className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 24 }}>
+            <View style={{ flex: 1, height: 1, backgroundColor: '#EDE8DF' }} />
+            <Text style={{ color: '#C4BEB8', fontSize: 12, paddingHorizontal: 12 }}>or</Text>
+            <View style={{ flex: 1, height: 1, backgroundColor: '#EDE8DF' }} />
           </View>
 
-          {/* Register link */}
-          <View className="flex-row justify-center">
-            <Text className="text-slate-500 dark:text-slate-400 text-sm">
-              New to DECA HQ?{' '}
-            </Text>
+          {/* Register */}
+          <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+            <Text style={{ color: '#A09A94', fontSize: 13 }}>New to DECA HQ? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-              <Text className="text-deca-blue-600 dark:text-deca-blue-400 text-sm font-semibold">
-                Create an account
-              </Text>
+              <Text style={{ color: '#756FC9', fontSize: 13, fontWeight: '600' }}>Create an account</Text>
             </TouchableOpacity>
           </View>
         </View>

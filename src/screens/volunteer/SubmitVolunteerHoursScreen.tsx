@@ -9,13 +9,18 @@ import {
   Alert,
   Image,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as ImagePicker from 'expo-image-picker';
+import { Feather } from '@expo/vector-icons';
 import { submitVolunteerSchema, SubmitVolunteerFormData } from '../../utils/validators';
 import { submitVolunteerHours, uploadProofImage } from '../../services/volunteerService';
 import { useAuth } from '../../hooks/useAuth';
+
+const LABEL = { color: '#A09A94', fontSize: 11, fontWeight: '600' as const, letterSpacing: 0.8, textTransform: 'uppercase' as const, marginBottom: 8 };
+const INPUT = { backgroundColor: '#FDFAF5', borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 14, color: '#1A1612', fontSize: 14 };
 
 export default function SubmitVolunteerHoursScreen() {
   const navigation = useNavigation();
@@ -41,14 +46,14 @@ export default function SubmitVolunteerHoursScreen() {
   const onSubmit = async (data: SubmitVolunteerFormData) => {
     if (!user) return;
     if (!proofUri) {
-      Alert.alert('Proof Required', 'Please attach a photo as proof of your volunteer work.');
+      Alert.alert('Proof Required', 'Please attach a photo as proof of your community work.');
       return;
     }
     setLoading(true);
     try {
       const proofUrl = await uploadProofImage(proofUri, user.uid);
       await submitVolunteerHours({ ...data, userId: user.uid, proofUrl });
-      Alert.alert('Submitted!', 'Your volunteer hours have been submitted for review.', [
+      Alert.alert('Submitted!', 'Your credits have been submitted for review.', [
         { text: 'OK', onPress: () => navigation.goBack() },
       ]);
     } catch (e: any) {
@@ -59,43 +64,40 @@ export default function SubmitVolunteerHoursScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-white dark:bg-slate-900" keyboardShouldPersistTaps="handled">
-      <View className="px-6 py-6">
-        {/* Title */}
-        <View className="mb-4">
-          <Text className="text-slate-700 dark:text-slate-300 text-sm font-medium mb-2">
-            Activity Title *
-          </Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F0E8' }} edges={['bottom']}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }} keyboardShouldPersistTaps="handled">
+
+        {/* Activity Title */}
+        <View style={{ marginBottom: 20 }}>
+          <Text style={LABEL}>Activity Title</Text>
           <Controller
             control={control}
             name="title"
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
-                className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 text-slate-900 dark:text-white"
+                style={INPUT}
                 placeholder="e.g. Food Bank Volunteering"
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor="#C4BEB8"
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
               />
             )}
           />
-          {errors.title && <Text className="text-red-500 text-xs mt-1">{errors.title.message}</Text>}
+          {errors.title && <Text style={{ color: '#C96F6F', fontSize: 12, marginTop: 6 }}>{errors.title.message}</Text>}
         </View>
 
         {/* Description */}
-        <View className="mb-4">
-          <Text className="text-slate-700 dark:text-slate-300 text-sm font-medium mb-2">
-            Description
-          </Text>
+        <View style={{ marginBottom: 20 }}>
+          <Text style={LABEL}>Description</Text>
           <Controller
             control={control}
             name="description"
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
-                className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 text-slate-900 dark:text-white"
-                placeholder="Briefly describe what you did..."
-                placeholderTextColor="#94a3b8"
+                style={[INPUT, { minHeight: 80, textAlignVertical: 'top' }]}
+                placeholder="Briefly describe what you did…"
+                placeholderTextColor="#C4BEB8"
                 multiline
                 numberOfLines={3}
                 onBlur={onBlur}
@@ -107,18 +109,16 @@ export default function SubmitVolunteerHoursScreen() {
         </View>
 
         {/* Hours */}
-        <View className="mb-6">
-          <Text className="text-slate-700 dark:text-slate-300 text-sm font-medium mb-2">
-            Hours *
-          </Text>
+        <View style={{ marginBottom: 20 }}>
+          <Text style={LABEL}>Credits (hours)</Text>
           <Controller
             control={control}
             name="hours"
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
-                className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 text-slate-900 dark:text-white"
+                style={[INPUT, { fontSize: 22, fontWeight: '600', textAlign: 'center' }]}
                 placeholder="2"
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor="#C4BEB8"
                 keyboardType="decimal-pad"
                 onBlur={onBlur}
                 onChangeText={v => onChange(parseFloat(v) || 0)}
@@ -126,25 +126,35 @@ export default function SubmitVolunteerHoursScreen() {
               />
             )}
           />
-          {errors.hours && <Text className="text-red-500 text-xs mt-1">{errors.hours.message}</Text>}
+          {errors.hours && <Text style={{ color: '#C96F6F', fontSize: 12, marginTop: 6 }}>{errors.hours.message}</Text>}
         </View>
 
-        {/* Proof Upload */}
-        <View className="mb-6">
-          <Text className="text-slate-700 dark:text-slate-300 text-sm font-medium mb-2">
-            Proof Photo *
-          </Text>
+        {/* Proof Photo */}
+        <View style={{ marginBottom: 28 }}>
+          <Text style={LABEL}>Proof Photo</Text>
           <TouchableOpacity
             onPress={pickImage}
-            className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-6 items-center"
+            activeOpacity={0.85}
+            style={{
+              borderWidth: 1.5,
+              borderStyle: 'dashed',
+              borderColor: '#C9C7EB',
+              borderRadius: 16,
+              padding: 24,
+              alignItems: 'center',
+              backgroundColor: '#F0EFF9',
+            }}
           >
             {proofUri ? (
-              <Image source={{ uri: proofUri }} className="w-full h-40 rounded-xl" resizeMode="cover" />
+              <Image source={{ uri: proofUri }} style={{ width: '100%', height: 160, borderRadius: 12 }} resizeMode="cover" />
             ) : (
               <>
-                <Text style={{ fontSize: 32 }} className="mb-2">📷</Text>
-                <Text className="text-slate-500 dark:text-slate-400 text-sm text-center">
-                  Tap to upload a photo as proof{'\n'}(screenshot, sign-in sheet, etc.)
+                <Feather name="camera" size={32} color="#756FC9" style={{ marginBottom: 10 }} />
+                <Text style={{ color: '#756FC9', fontSize: 13, fontWeight: '500', textAlign: 'center' }}>
+                  Tap to upload a photo
+                </Text>
+                <Text style={{ color: '#A09A94', fontSize: 12, textAlign: 'center', marginTop: 4 }}>
+                  Screenshot, sign-in sheet, etc.
                 </Text>
               </>
             )}
@@ -154,15 +164,18 @@ export default function SubmitVolunteerHoursScreen() {
         <TouchableOpacity
           onPress={handleSubmit(onSubmit)}
           disabled={loading}
-          className="bg-deca-blue-600 rounded-xl py-4 items-center"
+          activeOpacity={0.85}
+          style={{ backgroundColor: '#756FC9', borderRadius: 16, paddingVertical: 16, alignItems: 'center' }}
         >
           {loading ? (
-            <ActivityIndicator color="white" />
+            <ActivityIndicator color="#FDFAF5" />
           ) : (
-            <Text className="text-white font-semibold text-base">Submit for Review</Text>
+            <Text style={{ color: '#FDFAF5', fontWeight: '600', fontSize: 15 }}>Submit for Review</Text>
           )}
         </TouchableOpacity>
-      </View>
-    </ScrollView>
+
+        <View style={{ height: 24 }} />
+      </ScrollView>
+    </SafeAreaView>
   );
 }

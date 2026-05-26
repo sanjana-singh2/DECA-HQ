@@ -1,18 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  ActivityIndicator,
-  RefreshControl,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { Feather } from '@expo/vector-icons';
 import { useAuth } from '../../hooks/useAuth';
 import { getUserAttendanceHistory } from '../../services/attendanceService';
-import { getEventById } from '../../services/eventsService';
-import { getUpcomingEvents } from '../../services/eventsService';
+import { getEventById, getUpcomingEvents as fetchUpcoming } from '../../services/eventsService';
 import { Attendance, Event } from '../../types';
 import AttendanceCard from '../../components/AttendanceCard';
 
@@ -28,102 +22,69 @@ export default function AttendanceScreen() {
     if (!user) return;
     const [records, upcoming] = await Promise.all([
       getUserAttendanceHistory(user.uid),
-      getUpcomingEvents(10),
+      fetchUpcoming(10),
     ]);
-
     const withEvents = await Promise.all(
-      records.map(async a => ({
-        attendance: a,
-        event: await getEventById(a.eventId),
-      }))
+      records.map(async a => ({ attendance: a, event: await getEventById(a.eventId) }))
     );
-
     setHistory(withEvents);
     setUpcomingEvents(upcoming);
   };
 
-  useEffect(() => {
-    load().finally(() => setLoading(false));
-  }, []);
-
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await load();
-    setRefreshing(false);
-  };
+  useEffect(() => { load().finally(() => setLoading(false)); }, []);
+  const onRefresh = async () => { setRefreshing(true); await load(); setRefreshing(false); };
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-50 dark:bg-slate-900">
-      <ScrollView
-        className="flex-1"
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      >
-        <View className="px-4 pt-4">
-          <Text className="text-slate-900 dark:text-white text-2xl font-bold mb-6">
-            Attendance
-          </Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F0E8' }}>
+      <ScrollView style={{ flex: 1 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#756FC9" />}>
 
-          {/* Stats */}
-          <View className="bg-deca-blue-600 rounded-2xl p-5 mb-6">
-            <Text className="text-blue-100 text-sm mb-1">Total Meetings Attended</Text>
-            <Text className="text-white text-4xl font-bold">{user?.attendanceCount ?? 0}</Text>
-            <Text className="text-blue-200 text-xs mt-2">
-              Keep it up — attendance matters for DECA!
-            </Text>
+        <LinearGradient colors={['#D4D3ED', '#C5C8E8', '#CBBFE8']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+          style={{ paddingHorizontal: 24, paddingTop: 24, paddingBottom: 40 }}>
+          <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 28, color: '#1A1612', marginBottom: 4 }}>Attendance</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-end', marginTop: 12 }}>
+            <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 52, color: '#1A1612', lineHeight: 56 }}>{user?.attendanceCount ?? 0}</Text>
+            <Text style={{ color: '#756FC9', fontSize: 13, fontWeight: '500', marginLeft: 10, marginBottom: 8 }}>meetings attended</Text>
           </View>
+        </LinearGradient>
 
-          {/* Scan QR for upcoming events */}
+        <View style={{ paddingHorizontal: 20, marginTop: -20 }}>
           {upcomingEvents.length > 0 && (
-            <View className="mb-6">
-              <Text className="text-slate-900 dark:text-white font-semibold text-base mb-3">
-                Scan Attendance
-              </Text>
+            <View style={{ marginBottom: 24 }}>
+              <Text style={{ color: '#1A1612', fontWeight: '600', fontSize: 13, marginBottom: 12, letterSpacing: 0.2 }}>Scan Attendance</Text>
               {upcomingEvents.map(event => (
-                <TouchableOpacity
-                  key={event.id}
+                <TouchableOpacity key={event.id}
                   onPress={() => navigation.navigate('QRScanner', { eventId: event.id })}
-                  className="bg-white dark:bg-slate-800 rounded-2xl p-4 mb-3 border border-slate-100 dark:border-slate-700 flex-row items-center"
-                >
-                  <Text style={{ fontSize: 20 }} className="mr-3">📷</Text>
-                  <View className="flex-1">
-                    <Text className="text-slate-900 dark:text-white font-semibold text-sm">
-                      {event.title}
-                    </Text>
-                    <Text className="text-slate-500 dark:text-slate-400 text-xs">
-                      Tap to scan QR code
-                    </Text>
+                  style={{ backgroundColor: '#FDFAF5', borderRadius: 16, padding: 16, marginBottom: 10, flexDirection: 'row', alignItems: 'center' }}>
+                  <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: '#E3E2F5', alignItems: 'center', justifyContent: 'center', marginRight: 14 }}>
+                    <Feather name="camera" size={18} color="#756FC9" />
                   </View>
-                  <Text className="text-deca-blue-600 dark:text-deca-blue-400 text-sm">›</Text>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: '#1A1612', fontWeight: '600', fontSize: 14 }}>{event.title}</Text>
+                    <Text style={{ color: '#A09A94', fontSize: 12, marginTop: 2 }}>Tap to scan QR code</Text>
+                  </View>
+                  <Feather name="chevron-right" size={18} color="#C4BEB8" />
                 </TouchableOpacity>
               ))}
             </View>
           )}
 
-          {/* History */}
-          <Text className="text-slate-900 dark:text-white font-semibold text-base mb-3">
-            Attendance History
-          </Text>
+          <Text style={{ color: '#1A1612', fontWeight: '600', fontSize: 13, marginBottom: 12, letterSpacing: 0.2 }}>Attendance History</Text>
 
           {loading ? (
-            <ActivityIndicator color="#1a56db" className="mt-4" />
+            <ActivityIndicator color="#756FC9" style={{ marginTop: 24 }} />
           ) : history.length === 0 ? (
-            <View className="items-center py-10">
-              <Text style={{ fontSize: 40 }} className="mb-3">📋</Text>
-              <Text className="text-slate-500 dark:text-slate-400 text-sm text-center">
+            <View style={{ alignItems: 'center', paddingVertical: 40 }}>
+              <Feather name="clipboard" size={36} color="#C4BEB8" style={{ marginBottom: 10 }} />
+              <Text style={{ color: '#A09A94', fontSize: 13, textAlign: 'center' }}>
                 No attendance records yet.{'\n'}Scan a QR code at your next meeting!
               </Text>
             </View>
           ) : (
             history.map(({ attendance, event }) => (
-              <AttendanceCard
-                key={attendance.id}
-                attendance={attendance}
-                eventTitle={event?.title ?? 'Unknown Event'}
-              />
+              <AttendanceCard key={attendance.id} attendance={attendance} eventTitle={event?.title ?? 'Unknown Event'} />
             ))
           )}
-
-          <View className="h-6" />
+          <View style={{ height: 24 }} />
         </View>
       </ScrollView>
     </SafeAreaView>

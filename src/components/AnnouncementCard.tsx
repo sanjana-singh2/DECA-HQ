@@ -3,32 +3,29 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { Announcement } from '../types';
 import { formatRelativeTime } from '../utils/formatters';
 
-interface Props {
-  announcement: Announcement;
-  onPress?: () => void;
-}
+interface Props { announcement: Announcement; onPress?: () => void; }
 
 export default function AnnouncementCard({ announcement, onPress }: Props) {
   return (
     <TouchableOpacity
       onPress={onPress}
-      className="bg-white dark:bg-slate-800 rounded-2xl p-4 mb-3 border border-slate-100 dark:border-slate-700 shadow-sm"
       activeOpacity={0.85}
+      style={{ backgroundColor: '#FDFAF5', borderRadius: 16, padding: 16, marginBottom: 10 }}
     >
-      <View className="flex-row items-center mb-2">
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
         {announcement.isPinned && (
-          <View className="bg-deca-blue-100 dark:bg-deca-blue-900 rounded-full px-2 py-0.5 mr-2">
-            <Text className="text-deca-blue-600 dark:text-deca-blue-300 text-xs font-medium">Pinned</Text>
+          <View style={{ backgroundColor: '#E3E2F5', borderRadius: 20, paddingHorizontal: 8, paddingVertical: 2, marginRight: 8 }}>
+            <Text style={{ color: '#756FC9', fontSize: 11, fontWeight: '500' }}>Pinned</Text>
           </View>
         )}
-        <Text className="text-slate-400 dark:text-slate-500 text-xs ml-auto">
+        <Text style={{ color: '#C4BEB8', fontSize: 11, marginLeft: 'auto' }}>
           {formatRelativeTime(announcement.createdAt)}
         </Text>
       </View>
-      <Text className="text-slate-900 dark:text-white font-semibold text-base mb-1">
+      <Text style={{ color: '#1A1612', fontWeight: '600', fontSize: 14, marginBottom: 4 }}>
         {announcement.title}
       </Text>
-      <Text className="text-slate-500 dark:text-slate-400 text-sm leading-5" numberOfLines={2}>
+      <Text style={{ color: '#A09A94', fontSize: 13, lineHeight: 19 }} numberOfLines={2}>
         {announcement.content}
       </Text>
     </TouchableOpacity>

@@ -10,7 +10,8 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useRoute, RouteProp } from '@react-navigation/native';
-import { ForumPost, Comment } from '../../types';
+import { Feather } from '@expo/vector-icons';
+import { Comment } from '../../types';
 import { getPostComments, addComment } from '../../services/forumService';
 import { formatRelativeTime } from '../../utils/formatters';
 import { useAuth } from '../../hooks/useAuth';
@@ -31,9 +32,7 @@ export default function PostDetailScreen() {
     setComments(data);
   };
 
-  useEffect(() => {
-    load().finally(() => setLoading(false));
-  }, [postId]);
+  useEffect(() => { load().finally(() => setLoading(false)); }, [postId]);
 
   const handleComment = async () => {
     if (!text.trim() || !user) return;
@@ -50,46 +49,67 @@ export default function PostDetailScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1 bg-white dark:bg-slate-900"
+      style={{ flex: 1, backgroundColor: '#F5F0E8' }}
       keyboardVerticalOffset={90}
     >
-      <ScrollView className="flex-1 px-4 py-4">
-        <Text className="text-slate-900 dark:text-white font-semibold text-base mb-4">
-          Comments ({comments.length})
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
+        <Text style={{ color: '#A09A94', fontSize: 11, fontWeight: '600', letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 16 }}>
+          Comments · {comments.length}
         </Text>
 
         {loading ? (
-          <ActivityIndicator color="#1a56db" />
+          <ActivityIndicator color="#756FC9" />
         ) : comments.length === 0 ? (
-          <Text className="text-slate-500 dark:text-slate-400 text-sm text-center py-8">
-            No comments yet. Be the first to reply!
-          </Text>
+          <View style={{ alignItems: 'center', paddingVertical: 40 }}>
+            <Feather name="message-circle" size={32} color="#C4BEB8" style={{ marginBottom: 8 }} />
+            <Text style={{ color: '#A09A94', fontSize: 13, textAlign: 'center' }}>
+              No comments yet.{'\n'}Be the first to reply!
+            </Text>
+          </View>
         ) : (
           comments.map(comment => (
-            <View key={comment.id} className="mb-4">
-              <View className="flex-row items-center mb-1">
-                <View className="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 items-center justify-center mr-2">
-                  <Text className="text-slate-600 dark:text-slate-300 text-xs font-bold">
+            <View key={comment.id} style={{ marginBottom: 16 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                <View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: '#E3E2F5', alignItems: 'center', justifyContent: 'center', marginRight: 10 }}>
+                  <Text style={{ color: '#756FC9', fontSize: 12, fontWeight: '700' }}>
                     {comment.authorId.charAt(0).toUpperCase()}
                   </Text>
                 </View>
-                <Text className="text-slate-500 dark:text-slate-400 text-xs">
-                  {formatRelativeTime(comment.createdAt)}
-                </Text>
+                <Text style={{ color: '#A09A94', fontSize: 12 }}>{formatRelativeTime(comment.createdAt)}</Text>
               </View>
-              <View className="ml-9 bg-slate-50 dark:bg-slate-800 rounded-xl p-3">
-                <Text className="text-slate-700 dark:text-slate-300 text-sm">{comment.content}</Text>
+              <View style={{ marginLeft: 40, backgroundColor: '#FDFAF5', borderRadius: 14, padding: 14 }}>
+                <Text style={{ color: '#1A1612', fontSize: 14, lineHeight: 21 }}>{comment.content}</Text>
               </View>
             </View>
           ))
         )}
       </ScrollView>
 
-      <View className="px-4 py-3 border-t border-slate-100 dark:border-slate-800 flex-row items-end gap-3">
+      <View style={{
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        borderTopWidth: 1,
+        borderTopColor: '#EDE8DF',
+        backgroundColor: '#F5F0E8',
+        flexDirection: 'row',
+        alignItems: 'flex-end',
+        gap: 10,
+      }}>
         <TextInput
-          className="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-slate-900 dark:text-white text-sm max-h-20"
-          placeholder="Add a comment..."
-          placeholderTextColor="#94a3b8"
+          style={{
+            flex: 1,
+            backgroundColor: '#FDFAF5',
+            borderWidth: 1,
+            borderColor: '#EDE8DF',
+            borderRadius: 20,
+            paddingHorizontal: 16,
+            paddingVertical: 12,
+            color: '#1A1612',
+            fontSize: 14,
+            maxHeight: 80,
+          }}
+          placeholder="Add a comment…"
+          placeholderTextColor="#C4BEB8"
           multiline
           value={text}
           onChangeText={setText}
@@ -97,14 +117,20 @@ export default function PostDetailScreen() {
         <TouchableOpacity
           onPress={handleComment}
           disabled={!text.trim() || posting}
-          className={`w-10 h-10 rounded-full items-center justify-center ${
-            text.trim() ? 'bg-deca-blue-600' : 'bg-slate-200 dark:bg-slate-700'
-          }`}
+          activeOpacity={0.85}
+          style={{
+            width: 42,
+            height: 42,
+            borderRadius: 21,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: text.trim() ? '#756FC9' : '#EDE8DF',
+          }}
         >
           {posting ? (
-            <ActivityIndicator size="small" color="white" />
+            <ActivityIndicator size="small" color="#FDFAF5" />
           ) : (
-            <Text className="text-white text-base">↑</Text>
+            <Feather name="send" size={16} color="#FDFAF5" />
           )}
         </TouchableOpacity>
       </View>

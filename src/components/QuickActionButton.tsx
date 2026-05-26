@@ -1,29 +1,21 @@
 import React from 'react';
 import { TouchableOpacity, Text, View } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 
 interface Props {
-  icon: string;
+  icon: keyof typeof Feather.glyphMap;
   label: string;
   onPress: () => void;
   color?: string;
 }
 
-export default function QuickActionButton({ icon, label, onPress, color = '#1a56db' }: Props) {
+export default function QuickActionButton({ icon, label, onPress, color = '#756FC9' }: Props) {
   return (
-    <TouchableOpacity
-      onPress={onPress}
-      activeOpacity={0.8}
-      className="items-center flex-1"
-    >
-      <View
-        className="w-14 h-14 rounded-2xl items-center justify-center mb-2"
-        style={{ backgroundColor: color + '15' }}
-      >
-        <Text style={{ fontSize: 24 }}>{icon}</Text>
+    <TouchableOpacity onPress={onPress} activeOpacity={0.75} style={{ alignItems: 'center', flex: 1 }}>
+      <View style={{ width: 52, height: 52, borderRadius: 16, backgroundColor: color + '18', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+        <Feather name={icon} size={22} color={color} />
       </View>
-      <Text className="text-slate-600 dark:text-slate-400 text-xs text-center font-medium">
-        {label}
-      </Text>
+      <Text style={{ color: '#6B6560', fontSize: 11, fontWeight: '500', textAlign: 'center' }}>{label}</Text>
     </TouchableOpacity>
   );
 }

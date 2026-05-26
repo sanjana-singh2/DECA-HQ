@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
   Alert,
 } from 'react-native';
 import { useRoute, RouteProp } from '@react-navigation/native';
+import { Feather } from '@expo/vector-icons';
 import { useAuth } from '../../hooks/useAuth';
 import { getChannelPosts, createPost, deletePost } from '../../services/forumService';
 import { ForumPost } from '../../types';
@@ -37,9 +38,7 @@ export default function ChannelScreen() {
     setPosts(data);
   };
 
-  useEffect(() => {
-    load().finally(() => setLoading(false));
-  }, [channelId]);
+  useEffect(() => { load().finally(() => setLoading(false)); }, [channelId]);
 
   const handlePost = async () => {
     if (!text.trim() || !user) return;
@@ -58,39 +57,31 @@ export default function ChannelScreen() {
   const handleDelete = (postId: string) => {
     Alert.alert('Delete Post', 'Are you sure?', [
       { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          await deletePost(postId);
-          await load();
-        },
-      },
+      { text: 'Delete', style: 'destructive', onPress: async () => { await deletePost(postId); await load(); } },
     ]);
   };
 
   const renderPost = ({ item }: { item: ForumPost }) => {
     const isOwn = item.authorId === user?.uid;
     const canDelete = isOwn || isOfficer;
+    const initial = item.authorId.charAt(0).toUpperCase();
     return (
-      <View className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
-        <View className="flex-row items-center mb-2">
-          <View className="w-8 h-8 rounded-full bg-deca-blue-100 dark:bg-deca-blue-900 items-center justify-center mr-2">
-            <Text className="text-deca-blue-600 dark:text-deca-blue-300 text-sm font-bold">
-              {item.authorId.charAt(0).toUpperCase()}
-            </Text>
+      <View style={{ paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#EDE8DF' }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+          <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: '#E3E2F5', alignItems: 'center', justifyContent: 'center', marginRight: 10 }}>
+            <Text style={{ color: '#756FC9', fontSize: 14, fontWeight: '700' }}>{initial}</Text>
           </View>
-          <View className="flex-1">
-            <Text className="text-slate-900 dark:text-white font-semibold text-sm">Member</Text>
-            <Text className="text-slate-400 text-xs">{formatRelativeTime(item.createdAt)}</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: '#1A1612', fontWeight: '600', fontSize: 13 }}>Member</Text>
+            <Text style={{ color: '#A09A94', fontSize: 11, marginTop: 1 }}>{formatRelativeTime(item.createdAt)}</Text>
           </View>
-          {canDelete && (
-            <TouchableOpacity onPress={() => handleDelete(item.id)}>
-              <Text className="text-slate-400 text-xs">Delete</Text>
+          {canDelete ? (
+            <TouchableOpacity onPress={() => handleDelete(item.id)} activeOpacity={0.7}>
+              <Text style={{ color: '#C4BEB8', fontSize: 12 }}>Delete</Text>
             </TouchableOpacity>
-          )}
+          ) : null}
         </View>
-        <Text className="text-slate-700 dark:text-slate-300 text-sm leading-5">{item.content}</Text>
+        <Text style={{ color: '#1A1612', fontSize: 14, lineHeight: 21, marginLeft: 44 }}>{item.content}</Text>
       </View>
     );
   };
@@ -98,23 +89,24 @@ export default function ChannelScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1 bg-white dark:bg-slate-900"
+      style={{ flex: 1, backgroundColor: '#F5F0E8' }}
       keyboardVerticalOffset={90}
     >
       {loading ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator color="#1a56db" />
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <ActivityIndicator color="#756FC9" />
         </View>
       ) : (
         <FlatList
           data={posts}
           keyExtractor={item => item.id}
           renderItem={renderPost}
+          style={{ backgroundColor: '#FDFAF5' }}
           ListEmptyComponent={
-            <View className="flex-1 items-center justify-center py-20">
-              <Text style={{ fontSize: 36 }} className="mb-3">💬</Text>
-              <Text className="text-slate-500 dark:text-slate-400 text-sm text-center">
-                No posts yet. Be the first to share!
+            <View style={{ alignItems: 'center', paddingVertical: 56 }}>
+              <Feather name="message-circle" size={36} color="#C4BEB8" style={{ marginBottom: 10 }} />
+              <Text style={{ color: '#A09A94', fontSize: 13, textAlign: 'center' }}>
+                No posts yet.{'\n'}Be the first to share!
               </Text>
             </View>
           }
@@ -122,12 +114,33 @@ export default function ChannelScreen() {
         />
       )}
 
-      {canPost && (
-        <View className="px-4 py-3 border-t border-slate-100 dark:border-slate-800 flex-row items-end gap-3">
+      {canPost ? (
+        <View style={{
+          paddingHorizontal: 16,
+          paddingVertical: 12,
+          paddingBottom: Platform.OS === 'ios' ? 0 : 12,
+          borderTopWidth: 1,
+          borderTopColor: '#EDE8DF',
+          backgroundColor: '#F5F0E8',
+          flexDirection: 'row',
+          alignItems: 'flex-end',
+          gap: 10,
+        }}>
           <TextInput
-            className="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-slate-900 dark:text-white text-sm max-h-24"
-            placeholder="Write a message..."
-            placeholderTextColor="#94a3b8"
+            style={{
+              flex: 1,
+              backgroundColor: '#FDFAF5',
+              borderWidth: 1,
+              borderColor: '#EDE8DF',
+              borderRadius: 20,
+              paddingHorizontal: 16,
+              paddingVertical: 12,
+              color: '#1A1612',
+              fontSize: 14,
+              maxHeight: 96,
+            }}
+            placeholder="Write a message…"
+            placeholderTextColor="#C4BEB8"
             multiline
             value={text}
             onChangeText={setText}
@@ -135,18 +148,24 @@ export default function ChannelScreen() {
           <TouchableOpacity
             onPress={handlePost}
             disabled={!text.trim() || posting}
-            className={`w-10 h-10 rounded-full items-center justify-center ${
-              text.trim() ? 'bg-deca-blue-600' : 'bg-slate-200 dark:bg-slate-700'
-            }`}
+            activeOpacity={0.85}
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: 21,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: text.trim() ? '#756FC9' : '#EDE8DF',
+            }}
           >
             {posting ? (
-              <ActivityIndicator size="small" color="white" />
+              <ActivityIndicator size="small" color="#FDFAF5" />
             ) : (
-              <Text className="text-white text-base">↑</Text>
+              <Feather name="send" size={16} color="#FDFAF5" />
             )}
           </TouchableOpacity>
         </View>
-      )}
+      ) : null}
     </KeyboardAvoidingView>
   );
 }

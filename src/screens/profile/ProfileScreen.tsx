@@ -1,153 +1,100 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Switch,
-  Alert,
-} from 'react-native';
+import React from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Feather } from '@expo/vector-icons';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../context/ThemeContext';
-import { formatGrade, formatRoleLabel } from '../../utils/formatters';
-import { RoleColors } from '../../constants/colors';
+import { formatRoleLabel } from '../../utils/formatters';
 
-function SettingRow({
-  icon,
-  label,
-  value,
-  onPress,
-  rightElement,
-}: {
-  icon: string;
-  label: string;
-  value?: string;
-  onPress?: () => void;
-  rightElement?: React.ReactNode;
+type FeatherName = keyof typeof Feather.glyphMap;
+
+function Row({ icon, label, value, onPress, rightEl }: {
+  icon: FeatherName; label: string; value?: string; onPress?: () => void; rightEl?: React.ReactNode;
 }) {
   return (
-    <TouchableOpacity
-      onPress={onPress}
-      activeOpacity={onPress ? 0.7 : 1}
-      className="flex-row items-center py-3.5 border-b border-slate-100 dark:border-slate-800"
-    >
-      <Text style={{ fontSize: 18 }} className="w-8">{icon}</Text>
-      <Text className="flex-1 text-slate-700 dark:text-slate-300 text-sm font-medium">{label}</Text>
-      {value && <Text className="text-slate-400 dark:text-slate-500 text-sm mr-2">{value}</Text>}
-      {rightElement}
-      {onPress && !rightElement && (
-        <Text className="text-slate-400 text-base">›</Text>
-      )}
+    <TouchableOpacity onPress={onPress} activeOpacity={onPress ? 0.7 : 1}
+      style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#EDE8DF' }}>
+      <Feather name={icon} size={16} color="#A09A94" style={{ width: 28 }} />
+      <Text style={{ flex: 1, color: '#1A1612', fontSize: 14, fontWeight: '500' }}>{label}</Text>
+      {value ? <Text style={{ color: '#A09A94', fontSize: 13, marginRight: 8 }}>{value}</Text> : null}
+      {rightEl}
+      {onPress && !rightEl ? <Feather name="chevron-right" size={18} color="#C4BEB8" /> : null}
     </TouchableOpacity>
   );
 }
 
 export default function ProfileScreen() {
   const { user, logout, isLoading } = useAuth();
-  const { isDark, setMode, mode } = useTheme();
+  const { isDark, setMode } = useTheme();
 
   const handleLogout = () => {
     Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
       { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Sign Out',
-        style: 'destructive',
-        onPress: logout,
-      },
+      { text: 'Sign Out', style: 'destructive', onPress: logout },
     ]);
   };
 
-  const roleColor = user?.role ? RoleColors[user.role] : '#64748b';
-
   return (
-    <SafeAreaView className="flex-1 bg-slate-50 dark:bg-slate-900">
-      <ScrollView className="flex-1">
-        {/* Profile Header */}
-        <View className="items-center pt-8 pb-6 bg-white dark:bg-slate-800 mb-4">
-          <View className="w-20 h-20 rounded-full bg-deca-blue-600 items-center justify-center mb-4">
-            <Text className="text-white text-3xl font-bold">
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F0E8' }}>
+      <ScrollView style={{ flex: 1 }}>
+        {/* Hero */}
+        <View style={{ alignItems: 'center', paddingTop: 40, paddingBottom: 28, backgroundColor: '#FDFAF5', marginBottom: 16 }}>
+          <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: '#E3E2F5', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+            <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 32, color: '#756FC9' }}>
               {user?.fullName?.charAt(0) ?? '?'}
             </Text>
           </View>
-          <Text className="text-slate-900 dark:text-white text-xl font-bold mb-1">
-            {user?.fullName ?? 'Loading...'}
+          <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 22, color: '#1A1612', marginBottom: 4 }}>
+            {user?.fullName ?? '—'}
           </Text>
-          <Text className="text-slate-500 dark:text-slate-400 text-sm mb-3">
-            {user?.email}
-          </Text>
-          <View
-            className="rounded-full px-4 py-1.5"
-            style={{ backgroundColor: roleColor + '20' }}
-          >
-            <Text style={{ color: roleColor }} className="text-sm font-semibold">
+          <Text style={{ color: '#A09A94', fontSize: 13, marginBottom: 12 }}>{user?.email}</Text>
+          <View style={{ backgroundColor: '#E3E2F5', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 5 }}>
+            <Text style={{ color: '#756FC9', fontSize: 12, fontWeight: '600' }}>
               {user?.role ? formatRoleLabel(user.role) : '—'}
             </Text>
           </View>
         </View>
 
         {/* Stats */}
-        <View className="flex-row px-4 mb-4 gap-3">
-          <View className="flex-1 bg-white dark:bg-slate-800 rounded-2xl p-4 items-center border border-slate-100 dark:border-slate-700">
-            <Text className="text-slate-900 dark:text-white text-2xl font-bold">
-              {user?.attendanceCount ?? 0}
-            </Text>
-            <Text className="text-slate-500 dark:text-slate-400 text-xs mt-1">Meetings</Text>
-          </View>
-          <View className="flex-1 bg-white dark:bg-slate-800 rounded-2xl p-4 items-center border border-slate-100 dark:border-slate-700">
-            <Text className="text-slate-900 dark:text-white text-2xl font-bold">
-              {user?.volunteerHours ?? 0}
-            </Text>
-            <Text className="text-slate-500 dark:text-slate-400 text-xs mt-1">Vol. Hours</Text>
-          </View>
-          <View className="flex-1 bg-white dark:bg-slate-800 rounded-2xl p-4 items-center border border-slate-100 dark:border-slate-700">
-            <Text className="text-slate-900 dark:text-white text-2xl font-bold">
-              {user?.grade ?? '—'}
-            </Text>
-            <Text className="text-slate-500 dark:text-slate-400 text-xs mt-1">Grade</Text>
-          </View>
+        <View style={{ flexDirection: 'row', paddingHorizontal: 20, gap: 12, marginBottom: 16 }}>
+          {[
+            { label: 'Meetings', value: user?.attendanceCount ?? 0 },
+            { label: 'Credits',  value: user?.volunteerHours  ?? 0 },
+            { label: 'Grade',    value: user?.grade ?? '—' },
+          ].map(s => (
+            <View key={s.label} style={{ flex: 1, backgroundColor: '#FDFAF5', borderRadius: 16, padding: 14, alignItems: 'center' }}>
+              <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 24, color: '#1A1612' }}>{s.value}</Text>
+              <Text style={{ color: '#A09A94', fontSize: 11, marginTop: 3 }}>{s.label}</Text>
+            </View>
+          ))}
         </View>
 
-        {/* Settings */}
-        <View className="bg-white dark:bg-slate-800 mx-4 rounded-2xl px-4 mb-4 border border-slate-100 dark:border-slate-700">
-          <Text className="text-slate-400 dark:text-slate-500 text-xs font-medium pt-4 pb-2 uppercase tracking-wider">
-            Preferences
-          </Text>
-          <SettingRow
-            icon="🌙"
-            label="Dark Mode"
-            rightElement={
-              <Switch
-                value={isDark}
-                onValueChange={v => setMode(v ? 'dark' : 'light')}
-                trackColor={{ false: '#e2e8f0', true: '#1a56db' }}
-                thumbColor={isDark ? '#ffffff' : '#f1f5f9'}
-              />
-            }
-          />
-          <SettingRow icon="🔔" label="Notifications" onPress={() => {}} />
+        {/* Preferences */}
+        <View style={{ backgroundColor: '#FDFAF5', marginHorizontal: 20, borderRadius: 16, paddingHorizontal: 16, marginBottom: 12 }}>
+          <Text style={{ color: '#C4BEB8', fontSize: 11, fontWeight: '600', paddingTop: 14, paddingBottom: 4, letterSpacing: 0.8, textTransform: 'uppercase' }}>Preferences</Text>
+          <Row icon="moon" label="Dark Mode" rightEl={
+            <Switch value={isDark} onValueChange={v => setMode(v ? 'dark' : 'light')}
+              trackColor={{ false: '#EDE8DF', true: '#756FC9' }} thumbColor="#FDFAF5" />
+          } />
+          <Row icon="bell" label="Notifications" onPress={() => {}} />
         </View>
 
-        <View className="bg-white dark:bg-slate-800 mx-4 rounded-2xl px-4 mb-4 border border-slate-100 dark:border-slate-700">
-          <Text className="text-slate-400 dark:text-slate-500 text-xs font-medium pt-4 pb-2 uppercase tracking-wider">
-            Account
-          </Text>
-          <SettingRow icon="✉️" label="Email" value={user?.email ?? ''} />
-          <SettingRow icon="🎓" label="Grade" value={user?.grade ? `${user.grade}th` : '—'} />
-          <SettingRow icon="🏅" label="Role" value={user?.role ? formatRoleLabel(user.role) : '—'} />
+        {/* Account */}
+        <View style={{ backgroundColor: '#FDFAF5', marginHorizontal: 20, borderRadius: 16, paddingHorizontal: 16, marginBottom: 20 }}>
+          <Text style={{ color: '#C4BEB8', fontSize: 11, fontWeight: '600', paddingTop: 14, paddingBottom: 4, letterSpacing: 0.8, textTransform: 'uppercase' }}>Account</Text>
+          <Row icon="mail"   label="Email" value={user?.email ?? ''} />
+          <Row icon="book"   label="Grade" value={user?.grade ? `${user.grade}th` : '—'} />
+          <Row icon="shield" label="Role"  value={user?.role ? formatRoleLabel(user.role) : '—'} />
         </View>
 
-        <View className="px-4 mb-8">
-          <TouchableOpacity
-            onPress={handleLogout}
-            disabled={isLoading}
-            className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl py-4 items-center"
-          >
-            <Text className="text-red-500 font-semibold text-base">Sign Out</Text>
+        {/* Sign out */}
+        <View style={{ paddingHorizontal: 20, marginBottom: 40 }}>
+          <TouchableOpacity onPress={handleLogout} disabled={isLoading}
+            style={{ backgroundColor: '#FEF2F2', borderWidth: 1, borderColor: '#FECACA', borderRadius: 16, paddingVertical: 16, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8 }}>
+            <Feather name="log-out" size={16} color="#C96F6F" />
+            <Text style={{ color: '#C96F6F', fontWeight: '600', fontSize: 14 }}>Sign Out</Text>
           </TouchableOpacity>
-          <Text className="text-slate-400 dark:text-slate-600 text-xs text-center mt-4">
-            DECA HQ v1.0.0
-          </Text>
+          <Text style={{ color: '#C4BEB8', fontSize: 11, textAlign: 'center', marginTop: 16 }}>DECA HQ · est. 2025</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -6,8 +6,8 @@ import { useEvents } from '../../hooks/useEvents';
 import { useAuth } from '../../hooks/useAuth';
 import EventPreviewCard from '../../components/EventPreviewCard';
 import { EventTypeColors } from '../../constants/colors';
+import { Feather } from '@expo/vector-icons';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth } from 'date-fns';
-import { Event } from '../../types';
 
 const TYPE_FILTERS = ['All', 'meeting', 'competition', 'social', 'deadline'] as const;
 type Filter = typeof TYPE_FILTERS[number];
@@ -15,105 +15,85 @@ type Filter = typeof TYPE_FILTERS[number];
 export default function CalendarScreen() {
   const navigation = useNavigation<any>();
   const { isOfficer } = useAuth();
-  const { events, loading, refetch } = useEvents();
+  const { events, loading } = useEvents();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [filter, setFilter] = useState<Filter>('All');
 
   const monthStart = startOfMonth(currentMonth);
-  const monthEnd = endOfMonth(currentMonth);
+  const monthEnd   = endOfMonth(currentMonth);
   const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
-  const eventsOnDay = (day: Date) =>
-    events.filter(e => isSameDay(new Date(e.startTime), day));
-
-  const filteredEvents = events.filter(e => {
-    const inMonth = isSameMonth(new Date(e.startTime), currentMonth);
-    const matchesFilter = filter === 'All' || e.type === filter;
-    return inMonth && matchesFilter;
-  });
-
-  const prevMonth = () => setCurrentMonth(d => new Date(d.getFullYear(), d.getMonth() - 1, 1));
-  const nextMonth = () => setCurrentMonth(d => new Date(d.getFullYear(), d.getMonth() + 1, 1));
+  const eventsOnDay = (day: Date) => events.filter(e => isSameDay(new Date(e.startTime), day));
+  const filteredEvents = events.filter(e =>
+    isSameMonth(new Date(e.startTime), currentMonth) && (filter === 'All' || e.type === filter)
+  );
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-50 dark:bg-slate-900">
-      <View className="px-4 pt-4 pb-2">
-        <View className="flex-row items-center justify-between mb-4">
-          <Text className="text-slate-900 dark:text-white text-2xl font-bold">Calendar</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F0E8' }}>
+      <View style={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 8 }}>
+        {/* Header */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+          <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 30, color: '#1A1612' }}>Calendar</Text>
           {isOfficer && (
             <TouchableOpacity
               onPress={() => navigation.navigate('CreateEvent')}
-              className="bg-deca-blue-600 rounded-xl px-4 py-2"
+              style={{ backgroundColor: '#756FC9', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 8 }}
             >
-              <Text className="text-white font-medium text-sm">+ Event</Text>
+              <Text style={{ color: '#FDFAF5', fontWeight: '600', fontSize: 13 }}>+ Event</Text>
             </TouchableOpacity>
           )}
         </View>
 
-        {/* Month Navigator */}
-        <View className="flex-row items-center justify-between mb-4">
-          <TouchableOpacity onPress={prevMonth} className="p-2">
-            <Text className="text-deca-blue-600 text-xl">‹</Text>
+        {/* Month nav */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <TouchableOpacity onPress={() => setCurrentMonth(d => new Date(d.getFullYear(), d.getMonth() - 1, 1))} style={{ padding: 8 }}>
+            <Feather name="chevron-left" size={22} color="#756FC9" />
           </TouchableOpacity>
-          <Text className="text-slate-900 dark:text-white font-semibold text-base">
-            {format(currentMonth, 'MMMM yyyy')}
-          </Text>
-          <TouchableOpacity onPress={nextMonth} className="p-2">
-            <Text className="text-deca-blue-600 text-xl">›</Text>
+          <Text style={{ color: '#1A1612', fontWeight: '600', fontSize: 15 }}>{format(currentMonth, 'MMMM yyyy')}</Text>
+          <TouchableOpacity onPress={() => setCurrentMonth(d => new Date(d.getFullYear(), d.getMonth() + 1, 1))} style={{ padding: 8 }}>
+            <Feather name="chevron-right" size={22} color="#756FC9" />
           </TouchableOpacity>
         </View>
 
-        {/* Day Headers */}
-        <View className="flex-row mb-2">
-          {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
-            <View key={i} className="flex-1 items-center">
-              <Text className="text-slate-400 text-xs font-medium">{d}</Text>
+        {/* Day headers */}
+        <View style={{ flexDirection: 'row', marginBottom: 8 }}>
+          {['S','M','T','W','T','F','S'].map((d, i) => (
+            <View key={i} style={{ flex: 1, alignItems: 'center' }}>
+              <Text style={{ color: '#C4BEB8', fontSize: 11, fontWeight: '600' }}>{d}</Text>
             </View>
           ))}
         </View>
 
-        {/* Calendar Grid */}
-        <View className="flex-row flex-wrap mb-4">
+        {/* Calendar grid */}
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 16 }}>
           {Array.from({ length: monthStart.getDay() }).map((_, i) => (
-            <View key={`empty-${i}`} style={{ width: `${100 / 7}%` }} />
+            <View key={`e${i}`} style={{ width: `${100/7}%` }} />
           ))}
           {days.map(day => {
-            const dayEvents = eventsOnDay(day);
+            const dots = eventsOnDay(day);
             const isSelected = isSameDay(day, selectedDate);
             const isToday = isSameDay(day, new Date());
             return (
               <TouchableOpacity
                 key={day.toISOString()}
                 onPress={() => setSelectedDate(day)}
-                style={{ width: `${100 / 7}%` }}
-                className="items-center py-1"
+                style={{ width: `${100/7}%`, alignItems: 'center', paddingVertical: 4 }}
               >
-                <View
-                  className={`w-8 h-8 rounded-full items-center justify-center ${
-                    isSelected ? 'bg-deca-blue-600' : isToday ? 'border border-deca-blue-600' : ''
-                  }`}
-                >
-                  <Text
-                    className={`text-sm font-medium ${
-                      isSelected
-                        ? 'text-white'
-                        : isToday
-                        ? 'text-deca-blue-600 dark:text-deca-blue-400'
-                        : 'text-slate-700 dark:text-slate-300'
-                    }`}
-                  >
+                <View style={{
+                  width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center',
+                  backgroundColor: isSelected ? '#756FC9' : 'transparent',
+                  borderWidth: isToday && !isSelected ? 1.5 : 0,
+                  borderColor: '#756FC9',
+                }}>
+                  <Text style={{ fontSize: 13, fontWeight: '500', color: isSelected ? '#FDFAF5' : isToday ? '#756FC9' : '#1A1612' }}>
                     {format(day, 'd')}
                   </Text>
                 </View>
-                {dayEvents.length > 0 && (
-                  <View className="flex-row mt-0.5 gap-0.5 justify-center">
-                    {dayEvents.slice(0, 3).map((e, i) => (
-                      <View
-                        key={i}
-                        className="w-1.5 h-1.5 rounded-full"
-                        style={{ backgroundColor: EventTypeColors[e.type] }}
-                      />
+                {dots.length > 0 && (
+                  <View style={{ flexDirection: 'row', gap: 2, marginTop: 2, justifyContent: 'center' }}>
+                    {dots.slice(0, 3).map((e, i) => (
+                      <View key={i} style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: EventTypeColors[e.type] }} />
                     ))}
                   </View>
                 )}
@@ -122,23 +102,19 @@ export default function CalendarScreen() {
           })}
         </View>
 
-        {/* Filter Pills */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
+        {/* Filter pills */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 4 }}>
           {TYPE_FILTERS.map(f => (
             <TouchableOpacity
               key={f}
               onPress={() => setFilter(f)}
-              className={`mr-2 px-4 py-1.5 rounded-full border ${
-                filter === f
-                  ? 'bg-deca-blue-600 border-deca-blue-600'
-                  : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800'
-              }`}
+              style={{
+                marginRight: 8, paddingHorizontal: 16, paddingVertical: 7, borderRadius: 20,
+                backgroundColor: filter === f ? '#756FC9' : '#FDFAF5',
+                borderWidth: 1, borderColor: filter === f ? '#756FC9' : '#EDE8DF',
+              }}
             >
-              <Text
-                className={`text-sm font-medium capitalize ${
-                  filter === f ? 'text-white' : 'text-slate-600 dark:text-slate-400'
-                }`}
-              >
+              <Text style={{ fontSize: 12, fontWeight: '500', textTransform: 'capitalize', color: filter === f ? '#FDFAF5' : '#6B6560' }}>
                 {f}
               </Text>
             </TouchableOpacity>
@@ -146,27 +122,22 @@ export default function CalendarScreen() {
         </ScrollView>
       </View>
 
-      {/* Events List */}
-      <ScrollView className="flex-1 px-4">
+      {/* Events list */}
+      <ScrollView style={{ flex: 1, paddingHorizontal: 20 }}>
         {loading ? (
-          <ActivityIndicator className="mt-8" color="#1a56db" />
+          <ActivityIndicator style={{ marginTop: 32 }} color="#756FC9" />
         ) : filteredEvents.length === 0 ? (
-          <View className="items-center mt-12">
-            <Text style={{ fontSize: 40 }} className="mb-3">📭</Text>
-            <Text className="text-slate-500 dark:text-slate-400 text-sm text-center">
-              No events this month
-            </Text>
+          <View style={{ alignItems: 'center', marginTop: 48 }}>
+            <Feather name="calendar" size={36} color="#C4BEB8" style={{ marginBottom: 10 }} />
+            <Text style={{ color: '#A09A94', fontSize: 13, textAlign: 'center' }}>No events this month</Text>
           </View>
         ) : (
           filteredEvents.map(event => (
-            <EventPreviewCard
-              key={event.id}
-              event={event}
-              onPress={() => navigation.navigate('EventDetail', { eventId: event.id })}
-            />
+            <EventPreviewCard key={event.id} event={event}
+              onPress={() => navigation.navigate('EventDetail', { eventId: event.id })} />
           ))
         )}
-        <View className="h-6" />
+        <View style={{ height: 24 }} />
       </ScrollView>
     </SafeAreaView>
   );

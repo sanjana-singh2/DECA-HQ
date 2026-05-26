@@ -1,48 +1,37 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  ActivityIndicator,
-  RefreshControl,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { Feather } from '@expo/vector-icons';
 import { useAuth } from '../../hooks/useAuth';
 import { getUserVolunteerHours } from '../../services/volunteerService';
 import { VolunteerHour } from '../../types';
 import { formatTimestamp } from '../../utils/formatters';
 
 const STATUS_CONFIG = {
-  pending: { label: 'Pending', color: '#f59e0b', bg: 'bg-amber-50 dark:bg-amber-900/20' },
-  approved: { label: 'Approved', color: '#10b981', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
-  rejected: { label: 'Rejected', color: '#ef4444', bg: 'bg-red-50 dark:bg-red-900/20' },
+  pending:  { label: 'Pending',  color: '#C9946F', bg: '#FEF3C7' },
+  approved: { label: 'Approved', color: '#6FAF8A', bg: '#D1FAE5' },
+  rejected: { label: 'Rejected', color: '#C96F6F', bg: '#FEF2F2' },
 };
 
-function HourCard({ item }: { item: VolunteerHour }) {
-  const config = STATUS_CONFIG[item.status];
+function CreditCard({ item }: { item: VolunteerHour }) {
+  const cfg = STATUS_CONFIG[item.status];
   return (
-    <View className="bg-white dark:bg-slate-800 rounded-2xl p-4 mb-3 border border-slate-100 dark:border-slate-700">
-      <View className="flex-row items-start justify-between mb-2">
-        <View className="flex-1 mr-3">
-          <Text className="text-slate-900 dark:text-white font-semibold text-sm mb-0.5">
-            {item.title}
-          </Text>
-          <Text className="text-slate-400 dark:text-slate-500 text-xs">
-            {formatTimestamp(item.submittedAt)}
-          </Text>
+    <View style={{ backgroundColor: '#FDFAF5', borderRadius: 16, padding: 16, marginBottom: 10 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 8 }}>
+        <View style={{ flex: 1, marginRight: 12 }}>
+          <Text style={{ color: '#1A1612', fontWeight: '600', fontSize: 14, marginBottom: 2 }}>{item.title}</Text>
+          <Text style={{ color: '#C4BEB8', fontSize: 11 }}>{formatTimestamp(item.submittedAt)}</Text>
         </View>
-        <View className={`rounded-full px-3 py-1 ${config.bg}`}>
-          <Text style={{ color: config.color }} className="text-xs font-medium">
-            {config.label}
-          </Text>
+        <View style={{ backgroundColor: cfg.bg, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 3 }}>
+          <Text style={{ color: cfg.color, fontSize: 11, fontWeight: '600' }}>{cfg.label}</Text>
         </View>
       </View>
-      <View className="flex-row items-center">
-        <Text style={{ fontSize: 16 }}>⏱️</Text>
-        <Text className="text-slate-700 dark:text-slate-300 font-semibold ml-1">
-          {item.hours} {item.hours === 1 ? 'hour' : 'hours'}
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Feather name="award" size={14} color="#C9946F" />
+        <Text style={{ color: '#6B6560', fontWeight: '600', fontSize: 13, marginLeft: 6 }}>
+          {item.hours} {item.hours === 1 ? 'credit' : 'credits'}
         </Text>
       </View>
     </View>
@@ -56,79 +45,57 @@ export default function VolunteerHoursScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const load = async () => {
-    if (!user) return;
-    const data = await getUserVolunteerHours(user.uid);
-    setHours(data);
-  };
+  const load = async () => { if (!user) return; const data = await getUserVolunteerHours(user.uid); setHours(data); };
+  useEffect(() => { load().finally(() => setLoading(false)); }, []);
+  const onRefresh = async () => { setRefreshing(true); await load(); setRefreshing(false); };
 
-  useEffect(() => {
-    load().finally(() => setLoading(false));
-  }, []);
-
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await load();
-    setRefreshing(false);
-  };
-
-  const approvedHours = hours
-    .filter(h => h.status === 'approved')
-    .reduce((sum, h) => sum + h.hours, 0);
+  const approvedHours = hours.filter(h => h.status === 'approved').reduce((s, h) => s + h.hours, 0);
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-50 dark:bg-slate-900">
-      <ScrollView
-        className="flex-1"
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      >
-        <View className="px-4 pt-4">
-          <View className="flex-row items-center justify-between mb-6">
-            <Text className="text-slate-900 dark:text-white text-2xl font-bold">
-              Volunteer Hours
-            </Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F0E8' }}>
+      <ScrollView style={{ flex: 1 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#756FC9" />}>
+
+        <LinearGradient colors={['#D4D3ED', '#C5C8E8', '#CBBFE8']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+          style={{ paddingHorizontal: 24, paddingTop: 24, paddingBottom: 40 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 28, color: '#1A1612' }}>Credits</Text>
             {isOfficer && (
-              <TouchableOpacity
-                onPress={() => navigation.navigate('ApprovalQueue')}
-                className="border border-deca-blue-600 rounded-xl px-3 py-1.5"
-              >
-                <Text className="text-deca-blue-600 dark:text-deca-blue-400 text-sm font-medium">
-                  Review Queue
-                </Text>
+              <TouchableOpacity onPress={() => navigation.navigate('ApprovalQueue')}
+                style={{ backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 8 }}>
+                <Text style={{ color: '#756FC9', fontWeight: '600', fontSize: 13 }}>Review</Text>
               </TouchableOpacity>
             )}
           </View>
-
-          {/* Summary */}
-          <View className="bg-emerald-500 rounded-2xl p-5 mb-6">
-            <Text className="text-emerald-50 text-sm mb-1">Total Approved Hours</Text>
-            <Text className="text-white text-4xl font-bold">{approvedHours}</Text>
-            <Text className="text-emerald-100 text-xs mt-2">
+          <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
+            <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 52, color: '#1A1612', lineHeight: 56 }}>{approvedHours}</Text>
+            <Text style={{ color: '#756FC9', fontSize: 13, fontWeight: '500', marginLeft: 10, marginBottom: 8 }}>credits approved</Text>
+          </View>
+          {hours.filter(h => h.status === 'pending').length > 0 && (
+            <Text style={{ color: '#A09A94', fontSize: 12, marginTop: 6 }}>
               {hours.filter(h => h.status === 'pending').length} pending review
             </Text>
-          </View>
+          )}
+        </LinearGradient>
 
-          <TouchableOpacity
-            onPress={() => navigation.navigate('SubmitHours')}
-            className="bg-deca-blue-600 rounded-xl py-4 items-center mb-6"
-          >
-            <Text className="text-white font-semibold text-base">+ Submit Volunteer Hours</Text>
+        <View style={{ paddingHorizontal: 20, marginTop: -20 }}>
+          <TouchableOpacity onPress={() => navigation.navigate('SubmitHours')}
+            style={{ backgroundColor: '#756FC9', borderRadius: 14, paddingVertical: 15, alignItems: 'center', marginBottom: 24 }}>
+            <Text style={{ color: '#FDFAF5', fontWeight: '600', fontSize: 15 }}>+ Submit Credits</Text>
           </TouchableOpacity>
 
+          <Text style={{ color: '#1A1612', fontWeight: '600', fontSize: 13, marginBottom: 12, letterSpacing: 0.2 }}>Your Credits</Text>
+
           {loading ? (
-            <ActivityIndicator color="#1a56db" />
+            <ActivityIndicator color="#756FC9" style={{ marginTop: 24 }} />
           ) : hours.length === 0 ? (
-            <View className="items-center py-10">
-              <Text style={{ fontSize: 40 }} className="mb-3">🌟</Text>
-              <Text className="text-slate-500 dark:text-slate-400 text-sm text-center">
-                No volunteer hours yet.{'\n'}Submit your first entry!
+            <View style={{ alignItems: 'center', paddingVertical: 40 }}>
+              <Feather name="award" size={36} color="#C4BEB8" style={{ marginBottom: 10 }} />
+              <Text style={{ color: '#A09A94', fontSize: 13, textAlign: 'center' }}>
+                No credits yet.{'\n'}Submit your first entry!
               </Text>
             </View>
-          ) : (
-            hours.map(h => <HourCard key={h.id} item={h} />)
-          )}
-
-          <View className="h-6" />
+          ) : hours.map(h => <CreditCard key={h.id} item={h} />)}
+          <View style={{ height: 24 }} />
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -7,7 +7,7 @@ type ThemeMode = 'light' | 'dark' | 'system';
 interface ThemeContextValue {
   mode: ThemeMode;
   isDark: boolean;
-  colors: typeof Colors.light;
+  colors: typeof Colors.light | typeof Colors.dark;
   setMode: (mode: ThemeMode) => void;
 }
 

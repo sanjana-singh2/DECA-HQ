@@ -7,7 +7,9 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
+import { Feather } from '@expo/vector-icons';
 import { Event } from '../../types';
 import { getEventById, rsvpEvent, unrsvpEvent, deleteEvent } from '../../services/eventsService';
 import { generateQRPayload } from '../../services/attendanceService';
@@ -29,9 +31,7 @@ export default function EventDetailScreen() {
   const { eventId } = route.params;
 
   useEffect(() => {
-    getEventById(eventId)
-      .then(setEvent)
-      .finally(() => setLoading(false));
+    getEventById(eventId).then(setEvent).finally(() => setLoading(false));
   }, [eventId]);
 
   const hasRsvped = event?.rsvpList?.includes(user?.uid ?? '');
@@ -50,29 +50,22 @@ export default function EventDetailScreen() {
   const handleDelete = () => {
     Alert.alert('Delete Event', 'Are you sure you want to delete this event?', [
       { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          await deleteEvent(eventId);
-          navigation.goBack();
-        },
-      },
+      { text: 'Delete', style: 'destructive', onPress: async () => { await deleteEvent(eventId); navigation.goBack(); } },
     ]);
   };
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center bg-white dark:bg-slate-900">
-        <ActivityIndicator color="#1a56db" />
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F5F0E8' }}>
+        <ActivityIndicator color="#756FC9" />
       </View>
     );
   }
 
   if (!event) {
     return (
-      <View className="flex-1 items-center justify-center bg-white dark:bg-slate-900">
-        <Text className="text-slate-500">Event not found.</Text>
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F5F0E8' }}>
+        <Text style={{ color: '#A09A94', fontSize: 14 }}>Event not found.</Text>
       </View>
     );
   }
@@ -80,104 +73,101 @@ export default function EventDetailScreen() {
   const accentColor = EventTypeColors[event.type];
 
   return (
-    <ScrollView className="flex-1 bg-white dark:bg-slate-900">
-      {/* Hero */}
-      <View className="h-2 w-full" style={{ backgroundColor: accentColor }} />
-      <View className="px-6 pt-6 pb-4">
-        <View
-          className="self-start rounded-full px-3 py-1 mb-3"
-          style={{ backgroundColor: accentColor + '20' }}
-        >
-          <Text style={{ color: accentColor }} className="text-xs font-medium capitalize">
-            {event.type}
-          </Text>
+    <ScrollView style={{ flex: 1, backgroundColor: '#F5F0E8' }}>
+      {/* Gradient hero strip */}
+      <LinearGradient
+        colors={['#D4D3ED', '#C5C8E8', '#CBBFE8']}
+        start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+        style={{ paddingHorizontal: 24, paddingTop: 28, paddingBottom: 36 }}
+      >
+        <View style={{ alignSelf: 'flex-start', backgroundColor: accentColor + '30', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 4, marginBottom: 12 }}>
+          <Text style={{ color: accentColor, fontSize: 12, fontWeight: '600', textTransform: 'capitalize' }}>{event.type}</Text>
         </View>
-        <Text className="text-slate-900 dark:text-white text-2xl font-bold mb-2">
+        <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 28, color: '#1A1612', marginBottom: 10 }}>
           {event.title}
         </Text>
-        <Text className="text-slate-500 dark:text-slate-400 text-sm">
-          🕒 {formatEventTime(event.startTime, event.endTime)}
-        </Text>
-        {event.location && (
-          <Text className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-            📍 {event.location}
-          </Text>
-        )}
-      </View>
-
-      {/* Description */}
-      {event.description && (
-        <View className="px-6 pb-4 border-t border-slate-100 dark:border-slate-800 pt-4">
-          <Text className="text-slate-900 dark:text-white font-semibold mb-2">About</Text>
-          <Text className="text-slate-600 dark:text-slate-400 text-sm leading-6">
-            {event.description}
-          </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: event.location ? 4 : 0 }}>
+          <Feather name="clock" size={13} color="#6B6560" />
+          <Text style={{ color: '#6B6560', fontSize: 13 }}>{formatEventTime(event.startTime, event.endTime)}</Text>
         </View>
-      )}
+        {event.location ? (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <Feather name="map-pin" size={13} color="#6B6560" />
+            <Text style={{ color: '#6B6560', fontSize: 13 }}>{event.location}</Text>
+          </View>
+        ) : null}
+      </LinearGradient>
 
-      {/* RSVP Count */}
-      {event.rsvpList && event.rsvpList.length > 0 && (
-        <View className="px-6 pb-4">
-          <Text className="text-slate-500 dark:text-slate-400 text-sm">
-            👥 {event.rsvpList.length} attending
-          </Text>
-        </View>
-      )}
+      <View style={{ paddingHorizontal: 20, marginTop: -16 }}>
 
-      {/* QR Code (officer only) */}
-      {isOfficer && (
-        <View className="px-6 pb-4">
-          <TouchableOpacity
-            onPress={() => setShowQR(v => !v)}
-            className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 items-center border border-slate-100 dark:border-slate-700"
-          >
-            <Text className="text-slate-700 dark:text-slate-300 font-medium text-sm mb-1">
-              {showQR ? 'Hide' : 'Show'} Attendance QR Code
-            </Text>
-          </TouchableOpacity>
-          {showQR && (
-            <View className="items-center mt-4 p-4 bg-white rounded-xl border border-slate-100 dark:border-slate-700">
-              <QRCode
-                value={generateQRPayload(event.id)}
-                size={200}
-                color="#0f172a"
-                backgroundColor="white"
-              />
-              <Text className="text-slate-400 text-xs mt-3">
-                Members scan this to mark attendance
+        {/* About */}
+        {event.description ? (
+          <View style={{ backgroundColor: '#FDFAF5', borderRadius: 20, padding: 18, marginBottom: 14 }}>
+            <Text style={{ color: '#A09A94', fontSize: 11, fontWeight: '600', letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 8 }}>About</Text>
+            <Text style={{ color: '#1A1612', fontSize: 14, lineHeight: 22 }}>{event.description}</Text>
+          </View>
+        ) : null}
+
+        {/* RSVP count */}
+        {event.rsvpList && event.rsvpList.length > 0 ? (
+          <View style={{ backgroundColor: '#FDFAF5', borderRadius: 20, padding: 18, marginBottom: 14, flexDirection: 'row', alignItems: 'center' }}>
+            <Feather name="users" size={16} color="#1A1612" style={{ marginRight: 10 }} />
+            <Text style={{ color: '#1A1612', fontSize: 14, fontWeight: '500' }}>{event.rsvpList.length} attending</Text>
+          </View>
+        ) : null}
+
+        {/* QR Code (officers only) */}
+        {isOfficer ? (
+          <View style={{ marginBottom: 14 }}>
+            <TouchableOpacity
+              onPress={() => setShowQR(v => !v)}
+              activeOpacity={0.85}
+              style={{ backgroundColor: '#FDFAF5', borderRadius: 20, padding: 18, alignItems: 'center' }}
+            >
+              <Text style={{ color: '#756FC9', fontWeight: '600', fontSize: 14 }}>
+                {showQR ? 'Hide' : 'Show'} Attendance QR Code
               </Text>
-            </View>
-          )}
-        </View>
-      )}
+            </TouchableOpacity>
+            {showQR ? (
+              <View style={{ alignItems: 'center', marginTop: 14, backgroundColor: '#FDFAF5', borderRadius: 20, padding: 24 }}>
+                <QRCode value={generateQRPayload(event.id)} size={200} color="#1A1612" backgroundColor="#FDFAF5" />
+                <Text style={{ color: '#A09A94', fontSize: 12, marginTop: 12 }}>Members scan to mark attendance</Text>
+              </View>
+            ) : null}
+          </View>
+        ) : null}
 
-      {/* Actions */}
-      <View className="px-6 pb-10 gap-3">
+        {/* RSVP action */}
         <TouchableOpacity
           onPress={toggleRSVP}
-          className={`rounded-xl py-4 items-center ${
-            hasRsvped
-              ? 'bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700'
-              : 'bg-deca-blue-600'
-          }`}
+          activeOpacity={0.85}
+          style={{
+            borderRadius: 16,
+            paddingVertical: 16,
+            alignItems: 'center',
+            marginBottom: 10,
+            backgroundColor: hasRsvped ? '#FDFAF5' : '#756FC9',
+            borderWidth: hasRsvped ? 1 : 0,
+            borderColor: '#EDE8DF',
+          }}
         >
-          <Text
-            className={`font-semibold text-base ${
-              hasRsvped ? 'text-slate-700 dark:text-slate-300' : 'text-white'
-            }`}
-          >
+          <Text style={{ fontWeight: '600', fontSize: 15, color: hasRsvped ? '#6B6560' : '#FDFAF5' }}>
             {hasRsvped ? '✓ RSVP\'d — Remove' : 'RSVP for this event'}
           </Text>
         </TouchableOpacity>
 
-        {isOfficer && (
+        {/* Delete (officers only) */}
+        {isOfficer ? (
           <TouchableOpacity
             onPress={handleDelete}
-            className="rounded-xl py-4 items-center border border-red-200 dark:border-red-800"
+            activeOpacity={0.85}
+            style={{ borderRadius: 16, paddingVertical: 16, alignItems: 'center', backgroundColor: '#FEF2F2', borderWidth: 1, borderColor: '#FECACA', marginBottom: 10 }}
           >
-            <Text className="text-red-500 font-semibold text-base">Delete Event</Text>
+            <Text style={{ color: '#C96F6F', fontWeight: '600', fontSize: 15 }}>Delete Event</Text>
           </TouchableOpacity>
-        )}
+        ) : null}
+
+        <View style={{ height: 32 }} />
       </View>
     </ScrollView>
   );

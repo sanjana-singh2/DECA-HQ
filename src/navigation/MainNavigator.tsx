@@ -1,8 +1,8 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Text } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
+import { Feather } from '@expo/vector-icons';
 import { MainTabParamList } from '../types';
 
 import DashboardScreen from '../screens/dashboard/DashboardScreen';
@@ -32,8 +32,8 @@ function HomeStack() {
       <Stack.Screen name="Dashboard" component={DashboardScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Attendance" component={AttendanceScreen} options={{ title: 'Attendance' }} />
       <Stack.Screen name="QRScanner" component={QRScannerScreen} options={{ title: 'Scan QR Code', headerShown: false }} />
-      <Stack.Screen name="VolunteerHours" component={VolunteerHoursScreen} options={{ title: 'Volunteer Hours' }} />
-      <Stack.Screen name="SubmitHours" component={SubmitVolunteerHoursScreen} options={{ title: 'Submit Hours' }} />
+      <Stack.Screen name="VolunteerHours" component={VolunteerHoursScreen} options={{ title: 'Credits' }} />
+      <Stack.Screen name="SubmitHours" component={SubmitVolunteerHoursScreen} options={{ title: 'Submit Credits' }} />
       <Stack.Screen name="ApprovalQueue" component={ApprovalQueueScreen} options={{ title: 'Approval Queue' }} />
       <Stack.Screen name="Scores" component={ScoresScreen} options={{ title: 'My Scores' }} />
       <Stack.Screen name="AddScore" component={AddScoreScreen} options={{ title: 'Add Score' }} />
@@ -73,16 +73,17 @@ function ResourceStack() {
   );
 }
 
-const TabIcon = ({ name, focused }: { name: string; focused: boolean }) => {
-  const icons: Record<string, string> = {
-    Home: '🏠',
-    Calendar: '📅',
-    Forum: '💬',
-    Resources: '📚',
-    Profile: '👤',
-  };
-  return <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>{icons[name]}</Text>;
+const TAB_ICONS: Record<string, keyof typeof Feather.glyphMap> = {
+  Home:      'home',
+  Calendar:  'calendar',
+  Forum:     'message-circle',
+  Resources: 'book-open',
+  Profile:   'user',
 };
+
+const TabIcon = ({ name, focused, color }: { name: string; focused: boolean; color: string }) => (
+  <Feather name={TAB_ICONS[name]} size={22} color={color} />
+);
 
 export default function MainNavigator() {
   const { colors } = useTheme();
@@ -91,14 +92,17 @@ export default function MainNavigator() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarIcon: ({ focused }) => <TabIcon name={route.name} focused={focused} />,
+        tabBarIcon: ({ focused, color }) => <TabIcon name={route.name} focused={focused} color={color} />,
         tabBarActiveTintColor: colors.tab.active,
         tabBarInactiveTintColor: colors.tab.inactive,
         tabBarStyle: {
           backgroundColor: colors.tab.background,
           borderTopColor: colors.border,
+          borderTopWidth: 1,
           paddingBottom: 4,
           height: 60,
+          elevation: 0,
+          shadowOpacity: 0,
         },
         tabBarLabelStyle: {
           fontSize: 11,

@@ -5,11 +5,11 @@ export const APP_CONFIG = {
 } as const;
 
 export const CHANNELS = [
-  { id: 'announcements', name: 'Announcements', icon: '📢', isAnnouncement: true, description: 'Official chapter announcements' },
-  { id: 'general', name: 'General', icon: '💬', isAnnouncement: false, description: 'General discussion' },
-  { id: 'competition-prep', name: 'Competition Prep', icon: '🏆', isAnnouncement: false, description: 'Study tips and competition prep' },
-  { id: 'roleplay-help', name: 'Roleplay Help', icon: '🎭', isAnnouncement: false, description: 'Roleplay strategies and help' },
-  { id: 'fundraising', name: 'Fundraising', icon: '💰', isAnnouncement: false, description: 'Fundraising ideas and updates' },
+  { id: 'announcements',  name: 'Announcements',   icon: 'volume-2',       isAnnouncement: true,  description: 'Official chapter announcements' },
+  { id: 'general',        name: 'General',          icon: 'message-circle', isAnnouncement: false, description: 'General discussion' },
+  { id: 'competition-prep', name: 'Competition Prep', icon: 'award',        isAnnouncement: false, description: 'Study tips and competition prep' },
+  { id: 'roleplay-help',  name: 'Roleplay Help',    icon: 'users',          isAnnouncement: false, description: 'Roleplay strategies and help' },
+  { id: 'fundraising',    name: 'Fundraising',      icon: 'dollar-sign',    isAnnouncement: false, description: 'Fundraising ideas and updates' },
 ] as const;
 
 export const RESOURCE_CATEGORIES = [

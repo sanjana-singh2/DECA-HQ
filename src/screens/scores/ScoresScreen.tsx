@@ -1,14 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  ActivityIndicator,
-  RefreshControl,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { Feather } from '@expo/vector-icons';
 import { useAuth } from '../../hooks/useAuth';
 import { getUserScores, groupScoresByCategory, calculateAverage } from '../../services/scoresService';
 import { Score } from '../../types';
@@ -21,112 +16,66 @@ export default function ScoresScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const load = async () => {
-    if (!user) return;
-    const data = await getUserScores(user.uid);
-    setScores(data);
-  };
-
-  useEffect(() => {
-    load().finally(() => setLoading(false));
-  }, []);
-
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await load();
-    setRefreshing(false);
-  };
+  const load = async () => { if (!user) return; const data = await getUserScores(user.uid); setScores(data); };
+  useEffect(() => { load().finally(() => setLoading(false)); }, []);
+  const onRefresh = async () => { setRefreshing(true); await load(); setRefreshing(false); };
 
   const grouped = groupScoresByCategory(scores);
   const avgScore = calculateAverage(scores);
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-50 dark:bg-slate-900">
-      <ScrollView
-        className="flex-1"
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      >
-        <View className="px-4 pt-4">
-          <View className="flex-row items-center justify-between mb-6">
-            <Text className="text-slate-900 dark:text-white text-2xl font-bold">My Scores</Text>
-            <TouchableOpacity
-              onPress={() => navigation.navigate('AddScore')}
-              className="bg-deca-blue-600 rounded-xl px-4 py-2"
-            >
-              <Text className="text-white font-medium text-sm">+ Add Score</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F0E8' }}>
+      <ScrollView style={{ flex: 1 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#756FC9" />}>
+
+        <LinearGradient colors={['#D4D3ED', '#C5C8E8', '#CBBFE8']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+          style={{ paddingHorizontal: 24, paddingTop: 24, paddingBottom: 40 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 28, color: '#1A1612' }}>My Scores</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('AddScore')}
+              style={{ backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 8 }}>
+              <Text style={{ color: '#756FC9', fontWeight: '600', fontSize: 13 }}>+ Add</Text>
             </TouchableOpacity>
           </View>
-
-          {/* Summary */}
           {scores.length > 0 && (
-            <View className="bg-violet-600 rounded-2xl p-5 mb-6">
-              <Text className="text-violet-100 text-sm mb-1">Average Score</Text>
-              <Text className="text-white text-4xl font-bold">{avgScore.toFixed(1)}</Text>
-              <Text className="text-violet-200 text-xs mt-2">
-                Across {scores.length} recorded score{scores.length !== 1 ? 's' : ''}
-              </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
+              <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 52, color: '#1A1612', lineHeight: 56 }}>{avgScore.toFixed(1)}</Text>
+              <Text style={{ color: '#756FC9', fontSize: 13, fontWeight: '500', marginLeft: 10, marginBottom: 8 }}>avg score</Text>
             </View>
           )}
+        </LinearGradient>
 
+        <View style={{ paddingHorizontal: 20, marginTop: -20 }}>
           {loading ? (
-            <ActivityIndicator color="#1a56db" />
+            <ActivityIndicator color="#756FC9" style={{ marginTop: 32 }} />
           ) : scores.length === 0 ? (
-            <View className="items-center py-10">
-              <Text style={{ fontSize: 40 }} className="mb-3">📊</Text>
-              <Text className="text-slate-500 dark:text-slate-400 text-sm text-center">
+            <View style={{ alignItems: 'center', paddingVertical: 48 }}>
+              <Feather name="bar-chart-2" size={36} color="#C4BEB8" style={{ marginBottom: 10 }} />
+              <Text style={{ color: '#A09A94', fontSize: 13, textAlign: 'center' }}>
                 No scores recorded yet.{'\n'}Add your first score to track progress!
               </Text>
+              <TouchableOpacity onPress={() => navigation.navigate('AddScore')}
+                style={{ marginTop: 20, backgroundColor: '#756FC9', borderRadius: 14, paddingVertical: 13, paddingHorizontal: 28 }}>
+                <Text style={{ color: '#FDFAF5', fontWeight: '600', fontSize: 14 }}>+ Add Score</Text>
+              </TouchableOpacity>
             </View>
           ) : (
             Object.entries(grouped).map(([category, catScores]) => (
-              <View key={category} className="mb-6">
-                <View className="flex-row items-center justify-between mb-3">
-                  <Text className="text-slate-900 dark:text-white font-semibold text-base">
-                    {category}
-                  </Text>
-                  <Text className="text-slate-500 dark:text-slate-400 text-sm">
-                    Avg: {calculateAverage(catScores).toFixed(1)}
-                  </Text>
-                </View>
-                {catScores.map(score => (
-                  <View
-                    key={score.id}
-                    className="bg-white dark:bg-slate-800 rounded-xl p-4 mb-2 flex-row items-center border border-slate-100 dark:border-slate-700"
-                  >
-                    <View className="flex-1">
-                      <View className="flex-row items-center mb-1">
-                        <View
-                          className={`rounded-full px-2 py-0.5 mr-2 ${
-                            score.scoreType === 'competition'
-                              ? 'bg-violet-100 dark:bg-violet-900/30'
-                              : 'bg-slate-100 dark:bg-slate-700'
-                          }`}
-                        >
-                          <Text
-                            className={`text-xs font-medium ${
-                              score.scoreType === 'competition'
-                                ? 'text-violet-600 dark:text-violet-400'
-                                : 'text-slate-500 dark:text-slate-400'
-                            }`}
-                          >
-                            {score.scoreType === 'competition' ? '🏆 Competition' : '📝 Practice'}
-                          </Text>
-                        </View>
-                      </View>
-                      <Text className="text-slate-500 dark:text-slate-400 text-xs">
-                        {formatTimestamp(score.date)}
-                      </Text>
+              <View key={category} style={{ marginBottom: 20 }}>
+                <Text style={{ color: '#1A1612', fontWeight: '600', fontSize: 13, marginBottom: 10, letterSpacing: 0.2 }}>{category}</Text>
+                {(catScores as Score[]).map(score => (
+                  <View key={score.id} style={{ backgroundColor: '#FDFAF5', borderRadius: 14, padding: 14, marginBottom: 8, flexDirection: 'row', alignItems: 'center' }}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ color: '#1A1612', fontWeight: '600', fontSize: 14 }}>{score.eventCategory}</Text>
+                      <Text style={{ color: '#A09A94', fontSize: 12, marginTop: 2 }}>{formatTimestamp(score.date)}</Text>
+                      {score.notes ? <Text style={{ color: '#C4BEB8', fontSize: 11, marginTop: 2 }}>{score.notes}</Text> : null}
                     </View>
-                    <Text className="text-slate-900 dark:text-white text-2xl font-bold">
-                      {score.score}
-                    </Text>
+                    <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 26, color: '#756FC9' }}>{score.score}</Text>
                   </View>
                 ))}
               </View>
             ))
           )}
-
-          <View className="h-6" />
+          <View style={{ height: 24 }} />
         </View>
       </ScrollView>
     </SafeAreaView>
