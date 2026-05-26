@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../hooks/useAuth';
 import { useUpcomingEvents } from '../../hooks/useEvents';
+import { Feather } from '@expo/vector-icons';
 import AnnouncementCard from '../../components/AnnouncementCard';
 import EventPreviewCard from '../../components/EventPreviewCard';
 import QuickActionButton from '../../components/QuickActionButton';
@@ -139,7 +140,7 @@ export default function DashboardScreen() {
               </View>
             ) : events.length === 0 ? (
               <View style={{ backgroundColor: '#FDFAF5', borderRadius: 20, padding: 32, alignItems: 'center' }}>
-                <Text style={{ fontSize: 28, marginBottom: 8 }}>📭</Text>
+                <Feather name="inbox" size={28} color="#C4BEB8" style={{ marginBottom: 8 }} />
                 <Text style={{ color: '#A09A94', fontSize: 13, textAlign: 'center' }}>
                   No upcoming events.{'\n'}Check back soon!
                 </Text>

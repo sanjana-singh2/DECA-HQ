@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '../services/supabase';
-import { getUserProfile } from '../services/authService';
 import { User } from '../types';
 
 interface AuthContextValue {
@@ -18,39 +17,62 @@ const AuthContext = createContext<AuthContextValue>({
   refreshProfile: async () => {},
 });
 
+async function fetchProfile(userId: string): Promise<User | null> {
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', userId)
+    .single();
+  if (error || !data) return null;
+  return {
+    uid: data.id,
+    fullName: data.full_name,
+    email: data.email,
+    role: data.role,
+    grade: data.grade,
+    profilePhoto: data.profile_photo ?? '',
+    attendanceCount: data.attendance_count ?? 0,
+    volunteerHours: data.volunteer_hours ?? 0,
+    createdAt: data.created_at,
+  };
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [userProfile, setUserProfile] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const loadProfile = async (userId: string) => {
-    const profile = await getUserProfile(userId);
+  const refreshProfile = async () => {
+    if (!session?.user.id) return;
+    const profile = await fetchProfile(session.user.id);
     setUserProfile(profile);
   };
 
-  const refreshProfile = async () => {
-    if (session?.user) await loadProfile(session.user.id);
-  };
-
   useEffect(() => {
-    // Hydrate existing session from AsyncStorage
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
-      setSession(s);
-      if (s?.user) {
-        loadProfile(s.user.id).finally(() => setLoading(false));
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session?.user.id) {
+        fetchProfile(session.user.id).then(profile => {
+          setUserProfile(profile);
+          setLoading(false);
+        });
       } else {
         setLoading(false);
       }
     });
 
+    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, s) => {
-        setSession(s);
-        if (s?.user) {
-          await loadProfile(s.user.id);
+      async (_event, session) => {
+        setSession(session);
+        if (session?.user.id) {
+          const profile = await fetchProfile(session.user.id);
+          setUserProfile(profile);
         } else {
           setUserProfile(null);
         }
+        setLoading(false);
       }
     );
 
@@ -64,6 +86,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useAuthContext(): AuthContextValue {
+export function useAuthContext() {
   return useContext(AuthContext);
 }
