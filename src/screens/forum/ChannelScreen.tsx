@@ -64,7 +64,7 @@ export default function ChannelScreen() {
   const renderPost = ({ item }: { item: ForumPost }) => {
     const isOwn = item.authorId === user?.uid;
     const canDelete = isOwn || isOfficer;
-    const initial = item.authorId.charAt(0).toUpperCase();
+    const initial = item.authorName.charAt(0).toUpperCase();
     return (
       <View style={{ paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#EDE8DF' }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
@@ -72,7 +72,7 @@ export default function ChannelScreen() {
             <Text style={{ color: '#756FC9', fontSize: 14, fontWeight: '700' }}>{initial}</Text>
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ color: '#1A1612', fontWeight: '600', fontSize: 13 }}>Member</Text>
+            <Text style={{ color: '#1A1612', fontWeight: '600', fontSize: 13 }}>{item.authorName}</Text>
             <Text style={{ color: '#A09A94', fontSize: 11, marginTop: 1 }}>{formatRelativeTime(item.createdAt)}</Text>
           </View>
           {canDelete ? (

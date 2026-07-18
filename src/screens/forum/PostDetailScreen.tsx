@@ -72,10 +72,11 @@ export default function PostDetailScreen() {
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
                 <View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: '#E3E2F5', alignItems: 'center', justifyContent: 'center', marginRight: 10 }}>
                   <Text style={{ color: '#756FC9', fontSize: 12, fontWeight: '700' }}>
-                    {comment.authorId.charAt(0).toUpperCase()}
+                    {comment.authorName.charAt(0).toUpperCase()}
                   </Text>
                 </View>
-                <Text style={{ color: '#A09A94', fontSize: 12 }}>{formatRelativeTime(comment.createdAt)}</Text>
+                <Text style={{ color: '#1A1612', fontWeight: '600', fontSize: 12 }}>{comment.authorName}</Text>
+                <Text style={{ color: '#A09A94', fontSize: 12, marginLeft: 8 }}>{formatRelativeTime(comment.createdAt)}</Text>
               </View>
               <View style={{ marginLeft: 40, backgroundColor: '#FDFAF5', borderRadius: 14, padding: 14 }}>
                 <Text style={{ color: '#1A1612', fontSize: 14, lineHeight: 21 }}>{comment.content}</Text>

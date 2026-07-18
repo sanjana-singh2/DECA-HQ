@@ -147,51 +147,87 @@ AS $$
   SELECT role FROM public.users WHERE id = auth.uid();
 $$;
 
--- Atomically increments attendance_count
+-- Atomically increments attendance_count.
+-- Callable by any authenticated user, so it is self-defending: only the
+-- subject user or an officer/advisor may call it, and the result is capped
+-- at the real number of recorded attendance rows so repeated/blind calls
+-- can never inflate the count past reality.
 CREATE OR REPLACE FUNCTION public.increment_attendance_count(p_user_id UUID)
 RETURNS VOID
-LANGUAGE SQL SECURITY DEFINER
+LANGUAGE PLPGSQL SECURITY DEFINER
 SET search_path = public
 AS $$
+DECLARE
+  v_actual_count INTEGER;
+BEGIN
+  IF auth.uid() <> p_user_id AND public.get_my_role() NOT IN ('officer', 'advisor') THEN
+    RAISE EXCEPTION 'Not authorized to modify attendance count';
+  END IF;
+
+  SELECT COUNT(*) INTO v_actual_count
+  FROM public.attendance
+  WHERE user_id = p_user_id;
+
   UPDATE public.users
-  SET attendance_count = attendance_count + 1
+  SET attendance_count = LEAST(v_actual_count, attendance_count + 1)
   WHERE id = p_user_id;
+END;
 $$;
 
--- Atomically adds approved volunteer hours
+-- Recomputes a user's total approved volunteer hours from the ledger.
+-- Only officers/advisors may call it, and the total is derived from
+-- public.volunteer_hours rows with status = 'approved' rather than trusting
+-- a client-supplied hours value, so it cannot be used to fabricate hours.
 CREATE OR REPLACE FUNCTION public.increment_volunteer_hours(p_user_id UUID, p_hours NUMERIC)
 RETURNS VOID
-LANGUAGE SQL SECURITY DEFINER
+LANGUAGE PLPGSQL SECURITY DEFINER
 SET search_path = public
 AS $$
+DECLARE
+  v_approved_total NUMERIC;
+BEGIN
+  IF public.get_my_role() NOT IN ('officer', 'advisor') THEN
+    RAISE EXCEPTION 'Only officers or advisors may approve volunteer hours';
+  END IF;
+
+  SELECT COALESCE(SUM(hours), 0) INTO v_approved_total
+  FROM public.volunteer_hours
+  WHERE user_id = p_user_id AND status = 'approved';
+
   UPDATE public.users
-  SET volunteer_hours = volunteer_hours + p_hours
+  SET volunteer_hours = v_approved_total
   WHERE id = p_user_id;
+END;
 $$;
 
--- Atomically increments comment count on a post
+-- Recomputes comment_count from the real rows in public.comments, so blind/
+-- repeated RPC calls (this function has no way to check who's allowed to
+-- comment) just settle to the true count instead of drifting arbitrarily.
 CREATE OR REPLACE FUNCTION public.increment_comment_count(p_post_id UUID)
 RETURNS VOID
 LANGUAGE SQL SECURITY DEFINER
 SET search_path = public
 AS $$
   UPDATE public.forum_posts
-  SET comment_count = comment_count + 1
+  SET comment_count = (SELECT COUNT(*) FROM public.comments WHERE post_id = p_post_id)
   WHERE id = p_post_id;
 $$;
 
--- Atomically decrements comment count (floor 0)
+-- See increment_comment_count: recomputes rather than decrements blindly.
 CREATE OR REPLACE FUNCTION public.decrement_comment_count(p_post_id UUID)
 RETURNS VOID
 LANGUAGE SQL SECURITY DEFINER
 SET search_path = public
 AS $$
   UPDATE public.forum_posts
-  SET comment_count = GREATEST(0, comment_count - 1)
+  SET comment_count = (SELECT COUNT(*) FROM public.comments WHERE post_id = p_post_id)
   WHERE id = p_post_id;
 $$;
 
--- Auto-creates a public.users row when a new auth user is created
+-- Auto-creates a public.users row when a new auth user is created.
+-- Role always starts as 'member' — never trust raw_user_meta_data.role,
+-- since that field is client-supplied at signup (auth.signUp options.data)
+-- and would otherwise let anyone self-register as officer/advisor.
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE PLPGSQL SECURITY DEFINER
@@ -203,7 +239,7 @@ BEGIN
     NEW.id,
     COALESCE(NEW.email, ''),
     COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
-    COALESCE(NEW.raw_user_meta_data->>'role', 'member'),
+    'member',
     COALESCE((NEW.raw_user_meta_data->>'grade')::INTEGER, 10)
   )
   ON CONFLICT (id) DO NOTHING;
@@ -216,6 +252,33 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- Blocks non-advisors from changing role/email/attendance_count/volunteer_hours
+-- on the users table. RLS policies below only restrict which ROWS a user can
+-- update, not which COLUMNS — without this trigger, "users: can update own
+-- profile" would let any member promote themselves to advisor.
+CREATE OR REPLACE FUNCTION public.enforce_user_profile_update()
+RETURNS TRIGGER
+LANGUAGE PLPGSQL SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF public.get_my_role() <> 'advisor' THEN
+    IF NEW.role IS DISTINCT FROM OLD.role
+       OR NEW.email IS DISTINCT FROM OLD.email
+       OR NEW.attendance_count IS DISTINCT FROM OLD.attendance_count
+       OR NEW.volunteer_hours IS DISTINCT FROM OLD.volunteer_hours THEN
+      RAISE EXCEPTION 'Not authorized to modify protected profile fields';
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS enforce_user_profile_update_trigger ON public.users;
+CREATE TRIGGER enforce_user_profile_update_trigger
+  BEFORE UPDATE ON public.users
+  FOR EACH ROW EXECUTE FUNCTION public.enforce_user_profile_update();
 
 
 -- ============================================================
@@ -244,9 +307,10 @@ ALTER TABLE public.notifications   ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "users: authenticated can read all"
   ON public.users FOR SELECT TO authenticated USING (TRUE);
 
+DROP POLICY IF EXISTS "users: can insert own profile" ON public.users;
 CREATE POLICY "users: can insert own profile"
   ON public.users FOR INSERT TO authenticated
-  WITH CHECK (auth.uid() = id);
+  WITH CHECK (auth.uid() = id AND role = 'member');
 
 CREATE POLICY "users: can update own profile"
   ON public.users FOR UPDATE TO authenticated
@@ -260,9 +324,13 @@ CREATE POLICY "users: advisors can update any profile"
 CREATE POLICY "events: authenticated can read"
   ON public.events FOR SELECT TO authenticated USING (TRUE);
 
+DROP POLICY IF EXISTS "events: officers can insert" ON public.events;
 CREATE POLICY "events: officers can insert"
   ON public.events FOR INSERT TO authenticated
-  WITH CHECK (public.get_my_role() IN ('officer','advisor'));
+  WITH CHECK (
+    public.get_my_role() IN ('officer','advisor')
+    AND (created_by = auth.uid() OR created_by IS NULL)
+  );
 
 CREATE POLICY "events: officers can update"
   ON public.events FOR UPDATE TO authenticated
@@ -363,12 +431,14 @@ CREATE POLICY "volunteer: users can submit own"
   ON public.volunteer_hours FOR INSERT TO authenticated
   WITH CHECK (auth.uid() = user_id);
 
+-- Officers/advisors only — no self-service branch. The app never lets a
+-- submitter edit their own pending row; a "can edit while pending" clause
+-- here would let a member inflate hours/proof_url after submission but
+-- before review, since RLS re-checks against the NEW row too.
+DROP POLICY IF EXISTS "volunteer: officers can approve/reject" ON public.volunteer_hours;
 CREATE POLICY "volunteer: officers can approve/reject"
   ON public.volunteer_hours FOR UPDATE TO authenticated
-  USING (
-    public.get_my_role() IN ('officer','advisor')
-    OR (auth.uid() = user_id AND status = 'pending')
-  );
+  USING (public.get_my_role() IN ('officer','advisor'));
 
 -- ANNOUNCEMENTS
 CREATE POLICY "announcements: authenticated can read"
@@ -394,3 +464,55 @@ CREATE POLICY "notifications: officers can create"
 CREATE POLICY "notifications: users can mark own as read"
   ON public.notifications FOR UPDATE TO authenticated
   USING (target_user_id = auth.uid());
+
+
+-- ============================================================
+-- STORAGE BUCKETS & POLICIES
+-- ============================================================
+-- If these buckets already exist in your project with different settings
+-- (e.g. volunteer-proof created as public), the ON CONFLICT below will NOT
+-- change the existing bucket — fix visibility manually in
+-- Dashboard → Storage → (bucket) → Edit bucket.
+
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('resources', 'resources', true)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('volunteer-proof', 'volunteer-proof', false)
+ON CONFLICT (id) DO NOTHING;
+
+-- resources: publicly readable (study guides etc.), only officers/advisors manage
+DROP POLICY IF EXISTS "resources bucket: public read" ON storage.objects;
+CREATE POLICY "resources bucket: public read"
+  ON storage.objects FOR SELECT
+  USING (bucket_id = 'resources');
+
+DROP POLICY IF EXISTS "resources bucket: officers can upload" ON storage.objects;
+CREATE POLICY "resources bucket: officers can upload"
+  ON storage.objects FOR INSERT TO authenticated
+  WITH CHECK (bucket_id = 'resources' AND public.get_my_role() IN ('officer','advisor'));
+
+DROP POLICY IF EXISTS "resources bucket: officers can delete" ON storage.objects;
+CREATE POLICY "resources bucket: officers can delete"
+  ON storage.objects FOR DELETE TO authenticated
+  USING (bucket_id = 'resources' AND public.get_my_role() IN ('officer','advisor'));
+
+-- volunteer-proof: private. Objects are stored under "<user_id>/<file>", so a
+-- user may only touch their own folder; officers/advisors may read all
+-- (needed for the approval queue) but not upload/delete on a user's behalf.
+DROP POLICY IF EXISTS "volunteer-proof: users upload own folder" ON storage.objects;
+CREATE POLICY "volunteer-proof: users upload own folder"
+  ON storage.objects FOR INSERT TO authenticated
+  WITH CHECK (bucket_id = 'volunteer-proof' AND (storage.foldername(name))[1] = auth.uid()::text);
+
+DROP POLICY IF EXISTS "volunteer-proof: users read own; officers read all" ON storage.objects;
+CREATE POLICY "volunteer-proof: users read own; officers read all"
+  ON storage.objects FOR SELECT TO authenticated
+  USING (
+    bucket_id = 'volunteer-proof'
+    AND (
+      (storage.foldername(name))[1] = auth.uid()::text
+      OR public.get_my_role() IN ('officer','advisor')
+    )
+  );

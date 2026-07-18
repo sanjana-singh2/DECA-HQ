@@ -11,6 +11,7 @@ import EventPreviewCard from '../../components/EventPreviewCard';
 import QuickActionButton from '../../components/QuickActionButton';
 import { supabase } from '../../services/supabase';
 import { Announcement } from '../../types';
+import { GradientHero } from '../../constants/colors';
 
 export default function DashboardScreen() {
   const { user } = useAuth();
@@ -64,7 +65,7 @@ export default function DashboardScreen() {
       >
         {/* Gradient hero header */}
         <LinearGradient
-          colors={['#D4D3ED', '#C5C8E8', '#CBBFE8']}
+          colors={GradientHero}
           start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
           style={{ paddingHorizontal: 24, paddingTop: 20, paddingBottom: 48 }}
         >

@@ -56,11 +56,5 @@ export const EventTypeColors = {
   deadline:    '#C9946F',
 } as const;
 
-export const RoleColors = {
-  member:  '#A09A94',
-  officer: '#756FC9',
-  advisor: '#6FAF8A',
-} as const;
-
 // Gradient stops for hero sections
 export const GradientHero = ['#D4D3ED', '#C5C8E8', '#CBBFE8'] as const;

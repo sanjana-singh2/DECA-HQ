@@ -46,14 +46,9 @@ export const submitVolunteerSchema = z.object({
   hours: z.number().min(0.5).max(100),
 });
 
-export const forumPostSchema = z.object({
-  content: z.string().min(1, 'Post cannot be empty').max(2000),
-});
-
 export type LoginFormData = z.infer<typeof loginSchema>;
 export type RegisterFormData = z.infer<typeof registerSchema>;
 export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 export type CreateEventFormData = z.infer<typeof createEventSchema>;
 export type AddScoreFormData = z.infer<typeof addScoreSchema>;
 export type SubmitVolunteerFormData = z.infer<typeof submitVolunteerSchema>;
-export type ForumPostFormData = z.infer<typeof forumPostSchema>;

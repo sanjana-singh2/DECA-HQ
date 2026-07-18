@@ -9,6 +9,7 @@ import { getUserAttendanceHistory } from '../../services/attendanceService';
 import { getEventById, getUpcomingEvents as fetchUpcoming } from '../../services/eventsService';
 import { Attendance, Event } from '../../types';
 import AttendanceCard from '../../components/AttendanceCard';
+import { GradientHero } from '../../constants/colors';
 
 export default function AttendanceScreen() {
   const { user, isOfficer } = useAuth();
@@ -38,7 +39,7 @@ export default function AttendanceScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F0E8' }}>
       <ScrollView style={{ flex: 1 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#756FC9" />}>
 
-        <LinearGradient colors={['#D4D3ED', '#C5C8E8', '#CBBFE8']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+        <LinearGradient colors={GradientHero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
           style={{ paddingHorizontal: 24, paddingTop: 24, paddingBottom: 40 }}>
           <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 28, color: '#1A1612', marginBottom: 4 }}>Attendance</Text>
           <View style={{ flexDirection: 'row', alignItems: 'flex-end', marginTop: 12 }}>

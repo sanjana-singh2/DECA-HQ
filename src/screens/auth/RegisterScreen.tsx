@@ -11,6 +11,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { AuthStackParamList } from '../../types';
 import { registerSchema, RegisterFormData } from '../../utils/validators';
 import { useAuth } from '../../hooks/useAuth';
+import { GradientHero } from '../../constants/colors';
 
 type Nav = NativeStackNavigationProp<AuthStackParamList, 'Register'>;
 const GRADES = [9, 10, 11, 12];
@@ -47,7 +48,7 @@ export default function RegisterScreen() {
       <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
         {/* Slim gradient header */}
         <LinearGradient
-          colors={['#D4D3ED', '#C5C8E8', '#CBBFE8']}
+          colors={GradientHero}
           start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
           style={{ height: 120 }}
         />

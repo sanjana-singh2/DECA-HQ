@@ -18,9 +18,7 @@ import { Feather } from '@expo/vector-icons';
 import { submitVolunteerSchema, SubmitVolunteerFormData } from '../../utils/validators';
 import { submitVolunteerHours, uploadProofImage } from '../../services/volunteerService';
 import { useAuth } from '../../hooks/useAuth';
-
-const LABEL = { color: '#A09A94', fontSize: 11, fontWeight: '600' as const, letterSpacing: 0.8, textTransform: 'uppercase' as const, marginBottom: 8 };
-const INPUT = { backgroundColor: '#FDFAF5', borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 14, color: '#1A1612', fontSize: 14 };
+import { FormLabel as LABEL, FormInput as INPUT } from '../../constants/formStyles';
 
 export default function SubmitVolunteerHoursScreen() {
   const navigation = useNavigation();

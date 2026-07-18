@@ -5,6 +5,7 @@ function mapPost(row: Record<string, any>): ForumPost {
   return {
     id: row.id,
     authorId: row.author_id,
+    authorName: row.author?.full_name ?? 'Member',
     channelId: row.channel_id,
     content: row.content,
     attachments: row.attachments ?? [],
@@ -19,6 +20,7 @@ function mapComment(row: Record<string, any>): Comment {
     id: row.id,
     postId: row.post_id,
     authorId: row.author_id,
+    authorName: row.author?.full_name ?? 'Member',
     content: row.content,
     createdAt: row.created_at,
   };
@@ -48,7 +50,7 @@ export async function createPost(params: {
 export async function getChannelPosts(channelId: string, limitCount = 30): Promise<ForumPost[]> {
   const { data, error } = await supabase
     .from('forum_posts')
-    .select('*')
+    .select('*, author:users(full_name)')
     .eq('channel_id', channelId)
     .order('created_at', { ascending: false })
     .limit(limitCount);
@@ -114,7 +116,7 @@ export async function addComment(params: {
 export async function getPostComments(postId: string): Promise<Comment[]> {
   const { data, error } = await supabase
     .from('comments')
-    .select('*')
+    .select('*, author:users(full_name)')
     .eq('post_id', postId)
     .order('created_at', { ascending: true });
 

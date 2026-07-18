@@ -8,6 +8,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { getUserVolunteerHours } from '../../services/volunteerService';
 import { VolunteerHour } from '../../types';
 import { formatTimestamp } from '../../utils/formatters';
+import { GradientHero } from '../../constants/colors';
 
 const STATUS_CONFIG = {
   pending:  { label: 'Pending',  color: '#C9946F', bg: '#FEF3C7' },
@@ -55,7 +56,7 @@ export default function VolunteerHoursScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F0E8' }}>
       <ScrollView style={{ flex: 1 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#756FC9" />}>
 
-        <LinearGradient colors={['#D4D3ED', '#C5C8E8', '#CBBFE8']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+        <LinearGradient colors={GradientHero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
           style={{ paddingHorizontal: 24, paddingTop: 24, paddingBottom: 40 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
             <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 28, color: '#1A1612' }}>Credits</Text>

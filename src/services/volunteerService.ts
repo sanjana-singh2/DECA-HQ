@@ -18,6 +18,15 @@ function mapVolunteerHour(row: Record<string, any>): VolunteerHour {
   };
 }
 
+// volunteer-proof is a private bucket (proof photos may contain personal
+// info), so we store the storage path and resolve it to a short-lived
+// signed URL on read instead of a permanent public URL.
+async function withSignedProofUrl(hour: VolunteerHour): Promise<VolunteerHour> {
+  if (!hour.proofUrl) return hour;
+  const { data } = await supabase.storage.from(BUCKET).createSignedUrl(hour.proofUrl, 3600);
+  return { ...hour, proofUrl: data?.signedUrl ?? '' };
+}
+
 export async function uploadProofImage(uri: string, userId: string): Promise<string> {
   const response = await fetch(uri);
   const blob = await response.blob();
@@ -29,8 +38,7 @@ export async function uploadProofImage(uri: string, userId: string): Promise<str
 
   if (error) throw error;
 
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(storagePath);
-  return data.publicUrl;
+  return storagePath;
 }
 
 export async function submitVolunteerHours(params: {
@@ -65,7 +73,7 @@ export async function getUserVolunteerHours(userId: string): Promise<VolunteerHo
     .order('submitted_at', { ascending: false });
 
   if (error) throw error;
-  return (data ?? []).map(mapVolunteerHour);
+  return Promise.all((data ?? []).map(mapVolunteerHour).map(withSignedProofUrl));
 }
 
 export async function getPendingApprovals(): Promise<VolunteerHour[]> {
@@ -76,7 +84,7 @@ export async function getPendingApprovals(): Promise<VolunteerHour[]> {
     .order('submitted_at', { ascending: true });
 
   if (error) throw error;
-  return (data ?? []).map(mapVolunteerHour);
+  return Promise.all((data ?? []).map(mapVolunteerHour).map(withSignedProofUrl));
 }
 
 export async function approveVolunteerHours(

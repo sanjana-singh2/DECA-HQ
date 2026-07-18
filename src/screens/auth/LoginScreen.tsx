@@ -17,6 +17,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { AuthStackParamList } from '../../types';
 import { loginSchema, LoginFormData } from '../../utils/validators';
 import { useAuth } from '../../hooks/useAuth';
+import { GradientHero } from '../../constants/colors';
 
 type Nav = NativeStackNavigationProp<AuthStackParamList, 'Login'>;
 
@@ -44,7 +45,7 @@ export default function LoginScreen() {
       >
         {/* Hero gradient */}
         <LinearGradient
-          colors={['#D4D3ED', '#C5C8E8', '#CBBFE8']}
+          colors={GradientHero}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={{ height: 240 }}

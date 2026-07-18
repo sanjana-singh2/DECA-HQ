@@ -15,7 +15,7 @@ import { getEventById, rsvpEvent, unrsvpEvent, deleteEvent } from '../../service
 import { generateQRPayload } from '../../services/attendanceService';
 import { useAuth } from '../../hooks/useAuth';
 import { formatEventTime } from '../../utils/formatters';
-import { EventTypeColors } from '../../constants/colors';
+import { EventTypeColors, GradientHero } from '../../constants/colors';
 import QRCode from 'react-native-qrcode-svg';
 
 type RouteParams = { eventId: string };
@@ -76,7 +76,7 @@ export default function EventDetailScreen() {
     <ScrollView style={{ flex: 1, backgroundColor: '#F5F0E8' }}>
       {/* Gradient hero strip */}
       <LinearGradient
-        colors={['#D4D3ED', '#C5C8E8', '#CBBFE8']}
+        colors={GradientHero}
         start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
         style={{ paddingHorizontal: 24, paddingTop: 28, paddingBottom: 36 }}
       >

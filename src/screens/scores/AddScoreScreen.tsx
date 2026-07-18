@@ -18,8 +18,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { Feather } from '@expo/vector-icons';
 import { DECA_EVENT_CATEGORIES } from '../../constants/config';
 import { ScoreType } from '../../types';
-
-const LABEL = { color: '#A09A94', fontSize: 11, fontWeight: '600' as const, letterSpacing: 0.8, textTransform: 'uppercase' as const, marginBottom: 8 };
+import { FormLabel as LABEL } from '../../constants/formStyles';
 
 export default function AddScoreScreen() {
   const navigation = useNavigation();

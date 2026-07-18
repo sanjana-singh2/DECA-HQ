@@ -3,19 +3,12 @@ import { View, Text, ScrollView, TextInput, TouchableOpacity, ActivityIndicator,
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
-import { getAllResources, filterResources } from '../../services/resourcesService';
+import { getAllResources, filterResources, getResourceFileIcon } from '../../services/resourcesService';
 import { Resource } from '../../types';
 import { RESOURCE_CATEGORIES } from '../../constants/config';
 
-type FeatherIconName = keyof typeof Feather.glyphMap;
-const FILE_ICONS: Record<string, FeatherIconName> = {
-  pdf: 'file-text', doc: 'file-text', docx: 'file-text',
-  ppt: 'bar-chart-2', pptx: 'bar-chart-2', default: 'file',
-};
-
 function ResourceCard({ resource, onPress }: { resource: Resource; onPress: () => void }) {
-  const ext = resource.fileUrl.split('.').pop()?.toLowerCase() ?? 'default';
-  const iconName: FeatherIconName = FILE_ICONS[ext] ?? FILE_ICONS.default;
+  const iconName = getResourceFileIcon(resource.fileUrl);
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.85}
       style={{ backgroundColor: '#FDFAF5', borderRadius: 16, padding: 16, marginBottom: 10, flexDirection: 'row', alignItems: 'center' }}>

@@ -7,17 +7,21 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import { format } from 'date-fns';
 import { createEventSchema, CreateEventFormData } from '../../utils/validators';
 import { createEvent } from '../../services/eventsService';
 import { useAuth } from '../../hooks/useAuth';
 import { Feather } from '@expo/vector-icons';
 import { EventType } from '../../types';
 import { EventTypeColors } from '../../constants/colors';
+import { FormLabel as LABEL, FormInput as INPUT } from '../../constants/formStyles';
 
 const EVENT_TYPES: EventType[] = ['meeting', 'competition', 'social', 'deadline'];
 const TYPE_ICONS: Record<EventType, keyof typeof Feather.glyphMap> = {
@@ -27,14 +31,14 @@ const TYPE_ICONS: Record<EventType, keyof typeof Feather.glyphMap> = {
   deadline:    'alert-circle',
 };
 
-const LABEL = { color: '#A09A94', fontSize: 11, fontWeight: '600' as const, letterSpacing: 0.8, textTransform: 'uppercase' as const, marginBottom: 8 };
-const INPUT = { backgroundColor: '#FDFAF5', borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 14, color: '#1A1612', fontSize: 14 };
+type ActivePicker = 'startTime' | 'endTime' | null;
 
 export default function CreateEventScreen() {
   const navigation = useNavigation();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [selectedType, setSelectedType] = useState<EventType>('meeting');
+  const [activePicker, setActivePicker] = useState<ActivePicker>(null);
 
   const { control, handleSubmit, formState: { errors } } = useForm<CreateEventFormData>({
     resolver: zodResolver(createEventSchema),
@@ -161,12 +165,89 @@ export default function CreateEventScreen() {
           />
         </View>
 
-        {/* Date picker note */}
-        <View style={{ backgroundColor: '#F0EFF9', borderRadius: 14, padding: 14, marginBottom: 24 }}>
-          <Text style={{ color: '#756FC9', fontSize: 12 }}>
-            ℹ️ Date/time fields are pre-filled with defaults. Integrate a date picker for full control.
-          </Text>
+        {/* Start / End time */}
+        <View style={{ flexDirection: 'row', gap: 12, marginBottom: 24 }}>
+          <View style={{ flex: 1 }}>
+            <Text style={LABEL}>Starts</Text>
+            <Controller
+              control={control}
+              name="startTime"
+              render={({ field: { onChange, value } }) => (
+                <>
+                  <TouchableOpacity
+                    onPress={() => setActivePicker('startTime')}
+                    activeOpacity={0.8}
+                    style={[INPUT, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}
+                  >
+                    <Text style={{ color: '#1A1612', fontSize: 13 }}>{format(value, 'MMM d, h:mm a')}</Text>
+                    <Feather name="calendar" size={16} color="#A09A94" />
+                  </TouchableOpacity>
+                  {activePicker === 'startTime' && (
+                    <>
+                      <DateTimePicker
+                        value={value}
+                        mode="datetime"
+                        display="default"
+                        onChange={(event: DateTimePickerEvent, selectedDate?: Date) => {
+                          setActivePicker(Platform.OS === 'ios' ? 'startTime' : null);
+                          if (event.type === 'set' && selectedDate) onChange(selectedDate);
+                          if (event.type === 'dismissed') setActivePicker(null);
+                        }}
+                      />
+                      {Platform.OS === 'ios' && (
+                        <TouchableOpacity onPress={() => setActivePicker(null)} style={{ alignSelf: 'flex-end', marginTop: 4 }}>
+                          <Text style={{ color: '#756FC9', fontSize: 13, fontWeight: '600' }}>Done</Text>
+                        </TouchableOpacity>
+                      )}
+                    </>
+                  )}
+                </>
+              )}
+            />
+          </View>
+
+          <View style={{ flex: 1 }}>
+            <Text style={LABEL}>Ends</Text>
+            <Controller
+              control={control}
+              name="endTime"
+              render={({ field: { onChange, value } }) => (
+                <>
+                  <TouchableOpacity
+                    onPress={() => setActivePicker('endTime')}
+                    activeOpacity={0.8}
+                    style={[INPUT, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}
+                  >
+                    <Text style={{ color: '#1A1612', fontSize: 13 }}>{format(value, 'MMM d, h:mm a')}</Text>
+                    <Feather name="calendar" size={16} color="#A09A94" />
+                  </TouchableOpacity>
+                  {activePicker === 'endTime' && (
+                    <>
+                      <DateTimePicker
+                        value={value}
+                        mode="datetime"
+                        display="default"
+                        onChange={(event: DateTimePickerEvent, selectedDate?: Date) => {
+                          setActivePicker(Platform.OS === 'ios' ? 'endTime' : null);
+                          if (event.type === 'set' && selectedDate) onChange(selectedDate);
+                          if (event.type === 'dismissed') setActivePicker(null);
+                        }}
+                      />
+                      {Platform.OS === 'ios' && (
+                        <TouchableOpacity onPress={() => setActivePicker(null)} style={{ alignSelf: 'flex-end', marginTop: 4 }}>
+                          <Text style={{ color: '#756FC9', fontSize: 13, fontWeight: '600' }}>Done</Text>
+                        </TouchableOpacity>
+                      )}
+                    </>
+                  )}
+                </>
+              )}
+            />
+          </View>
         </View>
+        {errors.endTime && (
+          <Text style={{ color: '#C96F6F', fontSize: 12, marginTop: -16, marginBottom: 20 }}>{errors.endTime.message}</Text>
+        )}
 
         <TouchableOpacity
           onPress={handleSubmit(onSubmit)}

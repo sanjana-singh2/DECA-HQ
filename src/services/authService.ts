@@ -22,13 +22,17 @@ export async function registerUser(params: {
   grade: number;
   role?: UserRole;
 }): Promise<User> {
-  const { email, password, fullName, grade, role = 'member' } = params;
+  const { email, password, fullName, grade } = params;
+  // Role is always 'member' at self-registration — the DB enforces this too
+  // (handle_new_user trigger + "users: can insert own profile" RLS policy),
+  // so officer/advisor accounts must be granted afterward by an advisor.
+  const role: UserRole = 'member';
 
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      data: { full_name: fullName, grade, role },
+      data: { full_name: fullName, grade },
     },
   });
 

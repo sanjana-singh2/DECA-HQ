@@ -4,17 +4,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
 import { Resource } from '../../types';
-import { getResourceById, deleteResource } from '../../services/resourcesService';
+import { getResourceById, deleteResource, getResourceFileIcon } from '../../services/resourcesService';
 import { formatTimestamp } from '../../utils/formatters';
 import { useAuth } from '../../hooks/useAuth';
+import { GradientHero } from '../../constants/colors';
 
 type RouteParams = { resourceId: string };
-type FeatherIconName = keyof typeof Feather.glyphMap;
-
-const FILE_ICONS: Record<string, FeatherIconName> = {
-  pdf: 'file-text', doc: 'file-text', docx: 'file-text',
-  ppt: 'bar-chart-2', pptx: 'bar-chart-2', default: 'file',
-};
 
 export default function ResourceDetailScreen() {
   const route = useRoute<RouteProp<{ params: RouteParams }, 'params'>>();
@@ -38,12 +33,11 @@ export default function ResourceDetailScreen() {
   if (loading) return <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F5F0E8' }}><ActivityIndicator color="#756FC9" /></View>;
   if (!resource) return <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F5F0E8' }}><Text style={{ color: '#A09A94', fontSize: 14 }}>Resource not found.</Text></View>;
 
-  const ext = resource.fileUrl.split('.').pop()?.toLowerCase() ?? 'default';
-  const iconName: FeatherIconName = FILE_ICONS[ext] ?? FILE_ICONS.default;
+  const iconName = getResourceFileIcon(resource.fileUrl);
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: '#F5F0E8' }}>
-      <LinearGradient colors={['#D4D3ED', '#C5C8E8', '#CBBFE8']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+      <LinearGradient colors={GradientHero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
         style={{ paddingHorizontal: 24, paddingTop: 28, paddingBottom: 36, alignItems: 'flex-start' }}>
         <View style={{ width: 72, height: 72, backgroundColor: 'rgba(255,255,255,0.45)', borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
           <Feather name={iconName} size={30} color="#756FC9" />
