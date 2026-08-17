@@ -11,7 +11,9 @@ export const registerSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string(),
   grade: z.number().int().min(9).max(12),
-  role: z.enum(['member', 'officer', 'advisor']).default('member'),
+  // Every new account starts as 'member' — officer/advisor access is granted
+  // afterward via an invite code (see inviteCodeService.ts), never picked here.
+  inviteCode: z.string().optional(),
 }).refine(data => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ['confirmPassword'],
@@ -43,11 +45,18 @@ export const addScoreSchema = z.object({
 export const submitVolunteerSchema = z.object({
   title: z.string().min(3).max(100),
   description: z.string().max(500).optional(),
-  hours: z.number().min(0.5).max(100),
 });
 
-export const forumPostSchema = z.object({
-  content: z.string().min(1, 'Post cannot be empty').max(2000),
+export const uploadResourceSchema = z.object({
+  title: z.string().min(3, 'Title must be at least 3 characters').max(100),
+  description: z.string().max(500).optional(),
+  category: z.string().min(1, 'Please select a category'),
+});
+
+export const createAnnouncementSchema = z.object({
+  title: z.string().min(3, 'Title must be at least 3 characters').max(150),
+  content: z.string().min(1, 'Announcement text is required').max(1000),
+  isPinned: z.boolean().default(false),
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;
@@ -56,4 +65,5 @@ export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 export type CreateEventFormData = z.infer<typeof createEventSchema>;
 export type AddScoreFormData = z.infer<typeof addScoreSchema>;
 export type SubmitVolunteerFormData = z.infer<typeof submitVolunteerSchema>;
-export type ForumPostFormData = z.infer<typeof forumPostSchema>;
+export type UploadResourceFormData = z.infer<typeof uploadResourceSchema>;
+export type CreateAnnouncementFormData = z.infer<typeof createAnnouncementSchema>;

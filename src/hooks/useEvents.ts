@@ -29,13 +29,14 @@ export function useEvents() {
 export function useUpcomingEvents(limit = 5) {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     getUpcomingEvents(limit)
       .then(setEvents)
-      .catch(console.error)
+      .catch((e: any) => setError(e.message))
       .finally(() => setLoading(false));
   }, [limit]);
 
-  return { events, loading };
+  return { events, loading, error };
 }

@@ -9,7 +9,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#1a56db"
+      "backgroundColor": "#F5F0E8"
     },
     "ios": {
       "supportsTablet": false,
@@ -22,7 +22,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#1a56db"
+        "backgroundColor": "#DFE7F6"
       },
       "package": "com.decahq.app",
       "permissions": [
@@ -30,7 +30,9 @@
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE",
         "RECEIVE_BOOT_COMPLETED",
-        "VIBRATE"
+        "VIBRATE",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {
@@ -43,14 +45,16 @@
         "expo-notifications",
         {
           "icon": "./assets/notification-icon.png",
-          "color": "#1a56db"
+          "color": "#6495ED"
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker"
     ],
     "extra": {
       "eas": {
-        "projectId": "YOUR_EAS_PROJECT_ID"
+        "projectId": "b1620995-5ce3-41f1-be69-cbce8a3fd128"
       }
-    }
+    },
+    "owner": "sanjs09"
   }
 }

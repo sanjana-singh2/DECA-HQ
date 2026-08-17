@@ -3,30 +3,24 @@ import { View, Text, ScrollView, TextInput, TouchableOpacity, ActivityIndicator,
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
-import { getAllResources, filterResources } from '../../services/resourcesService';
+import { getAllResources, filterResources, getResourceFileIcon } from '../../services/resourcesService';
 import { Resource } from '../../types';
 import { RESOURCE_CATEGORIES } from '../../constants/config';
-
-type FeatherIconName = keyof typeof Feather.glyphMap;
-const FILE_ICONS: Record<string, FeatherIconName> = {
-  pdf: 'file-text', doc: 'file-text', docx: 'file-text',
-  ppt: 'bar-chart-2', pptx: 'bar-chart-2', default: 'file',
-};
+import { useAuth } from '../../hooks/useAuth';
 
 function ResourceCard({ resource, onPress }: { resource: Resource; onPress: () => void }) {
-  const ext = resource.fileUrl.split('.').pop()?.toLowerCase() ?? 'default';
-  const iconName: FeatherIconName = FILE_ICONS[ext] ?? FILE_ICONS.default;
+  const iconName = getResourceFileIcon(resource.fileUrl);
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.85}
       style={{ backgroundColor: '#FDFAF5', borderRadius: 16, padding: 16, marginBottom: 10, flexDirection: 'row', alignItems: 'center' }}>
-      <View style={{ width: 48, height: 48, backgroundColor: '#E3E2F5', borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginRight: 14 }}>
-        <Feather name={iconName} size={20} color="#756FC9" />
+      <View style={{ width: 48, height: 48, backgroundColor: '#DFE7F6', borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginRight: 14 }}>
+        <Feather name={iconName} size={20} color="#6495ED" />
       </View>
       <View style={{ flex: 1 }}>
         <Text style={{ color: '#1A1612', fontWeight: '600', fontSize: 13, marginBottom: 3 }} numberOfLines={1}>{resource.title}</Text>
         <Text style={{ color: '#A09A94', fontSize: 12, marginBottom: 4 }} numberOfLines={1}>{resource.description}</Text>
-        <View style={{ backgroundColor: '#E3E2F5', alignSelf: 'flex-start', borderRadius: 20, paddingHorizontal: 8, paddingVertical: 2 }}>
-          <Text style={{ color: '#756FC9', fontSize: 11, fontWeight: '500' }}>{resource.category}</Text>
+        <View style={{ backgroundColor: '#DFE7F6', alignSelf: 'flex-start', borderRadius: 20, paddingHorizontal: 8, paddingVertical: 2 }}>
+          <Text style={{ color: '#6495ED', fontSize: 11, fontWeight: '500' }}>{resource.category}</Text>
         </View>
       </View>
       <Feather name="chevron-right" size={18} color="#C4BEB8" style={{ marginLeft: 8 }} />
@@ -36,6 +30,7 @@ function ResourceCard({ resource, onPress }: { resource: Resource; onPress: () =
 
 export default function ResourceLibraryScreen() {
   const navigation = useNavigation<any>();
+  const { isOfficer } = useAuth();
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -49,7 +44,7 @@ export default function ResourceLibraryScreen() {
 
   const pill = (label: string, active: boolean, onPress: () => void) => (
     <TouchableOpacity key={label} onPress={onPress}
-      style={{ marginRight: 8, paddingHorizontal: 16, paddingVertical: 7, borderRadius: 20, backgroundColor: active ? '#756FC9' : '#FDFAF5', borderWidth: 1, borderColor: active ? '#756FC9' : '#EDE8DF' }}>
+      style={{ marginRight: 8, paddingHorizontal: 16, paddingVertical: 7, borderRadius: 20, backgroundColor: active ? '#6495ED' : '#FDFAF5', borderWidth: 1, borderColor: active ? '#6495ED' : '#EDE8DF' }}>
       <Text style={{ fontSize: 12, fontWeight: '500', color: active ? '#FDFAF5' : '#6B6560' }}>{label}</Text>
     </TouchableOpacity>
   );
@@ -57,7 +52,18 @@ export default function ResourceLibraryScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F0E8' }}>
       <View style={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 8 }}>
-        <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 30, color: '#1A1612', marginBottom: 16 }}>Resources</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 30, color: '#1A1612' }}>Resources</Text>
+          {isOfficer ? (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('UploadResource')}
+              activeOpacity={0.85}
+              style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: '#6495ED', alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Feather name="plus" size={18} color="#FDFAF5" />
+            </TouchableOpacity>
+          ) : null}
+        </View>
 
         <View style={{ backgroundColor: '#FDFAF5', borderColor: '#EDE8DF', borderWidth: 1, borderRadius: 14, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 11, marginBottom: 14 }}>
           <Feather name="search" size={15} color="#C4BEB8" style={{ marginRight: 10 }} />
@@ -71,9 +77,9 @@ export default function ResourceLibraryScreen() {
         </ScrollView>
       </View>
 
-      <ScrollView style={{ flex: 1, paddingHorizontal: 20 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#756FC9" />}>
+      <ScrollView style={{ flex: 1, paddingHorizontal: 20 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#6495ED" />}>
         {loading ? (
-          <ActivityIndicator color="#756FC9" style={{ marginTop: 32 }} />
+          <ActivityIndicator color="#6495ED" style={{ marginTop: 32 }} />
         ) : filtered.length === 0 ? (
           <View style={{ alignItems: 'center', marginTop: 48 }}>
             <Feather name="book-open" size={40} color="#C4BEB8" style={{ marginBottom: 12 }} />

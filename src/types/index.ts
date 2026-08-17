@@ -53,6 +53,7 @@ export interface Score {
 export interface ForumPost {
   id: string;
   authorId: string;
+  authorName: string;
   channelId: string;
   content: string;
   attachments: string[];
@@ -65,16 +66,9 @@ export interface Comment {
   id: string;
   postId: string;
   authorId: string;
+  authorName: string;
   content: string;
   createdAt: string;
-}
-
-export interface Channel {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  isAnnouncement: boolean;
 }
 
 export interface Resource {
@@ -91,27 +85,17 @@ export interface Resource {
 
 export type VolunteerStatus = 'pending' | 'approved' | 'rejected';
 
+// Every submission is worth exactly one credit — no variable hours/quantity input.
 export interface VolunteerHour {
   id: string;
   userId: string;
   title: string;
   description?: string;
-  hours: number;
   proofUrl: string;
   status: VolunteerStatus;
   submittedAt: string;
   reviewedBy?: string;
   reviewedAt?: string;
-}
-
-export interface Notification {
-  id: string;
-  title: string;
-  body: string;
-  type: 'event' | 'announcement' | 'attendance' | 'volunteer' | 'score';
-  targetUserId?: string;
-  createdAt: string;
-  read: boolean;
 }
 
 export interface Announcement {
@@ -138,42 +122,3 @@ export type MainTabParamList = {
   Profile: undefined;
 };
 
-export type HomeStackParamList = {
-  Dashboard: undefined;
-  AnnouncementDetail: { announcementId: string };
-};
-
-export type CalendarStackParamList = {
-  CalendarMain: undefined;
-  EventDetail: { eventId: string };
-  CreateEvent: undefined;
-};
-
-export type AttendanceStackParamList = {
-  AttendanceMain: undefined;
-  QRScanner: { eventId: string };
-  AttendanceAnalytics: undefined;
-};
-
-export type ForumStackParamList = {
-  ForumMain: undefined;
-  Channel: { channelId: string; channelName: string };
-  PostDetail: { postId: string };
-};
-
-export type ResourceStackParamList = {
-  ResourceLibrary: undefined;
-  ResourceDetail: { resourceId: string };
-};
-
-export type VolunteerStackParamList = {
-  VolunteerHours: undefined;
-  SubmitHours: undefined;
-  ApprovalQueue: undefined;
-};
-
-export type ScoresStackParamList = {
-  ScoresMain: undefined;
-  AddScore: undefined;
-  Analytics: undefined;
-};

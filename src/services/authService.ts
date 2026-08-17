@@ -20,15 +20,18 @@ export async function registerUser(params: {
   password: string;
   fullName: string;
   grade: number;
-  role?: UserRole;
 }): Promise<User> {
-  const { email, password, fullName, grade, role = 'member' } = params;
+  const { email, password, fullName, grade } = params;
+  // Role is always 'member' at self-registration — the DB enforces this too
+  // (handle_new_user trigger + "users: can insert own profile" RLS policy),
+  // so officer/advisor accounts must be granted afterward by an advisor.
+  const role: UserRole = 'member';
 
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      data: { full_name: fullName, grade, role },
+      data: { full_name: fullName, grade },
     },
   });
 
@@ -87,45 +90,4 @@ export async function getUserProfile(uid: string): Promise<User | null> {
 
   if (error || !data) return null;
   return mapUser(data);
-}
-
-export async function signInWithGoogle(idToken: string): Promise<User> {
-  const { data, error } = await supabase.auth.signInWithIdToken({
-    provider: 'google',
-    token: idToken,
-  });
-
-  if (error) throw error;
-  if (!data.user) throw new Error('Google sign-in failed');
-
-  const existing = await getUserProfile(data.user.id);
-  if (existing) return existing;
-
-  const fullName = data.user.user_metadata?.full_name ?? '';
-  const email = data.user.email ?? '';
-
-  const { error: profileError } = await supabase.from('users').upsert({
-    id: data.user.id,
-    full_name: fullName,
-    email,
-    role: 'member',
-    grade: 10,
-    profile_photo: data.user.user_metadata?.avatar_url ?? '',
-    attendance_count: 0,
-    volunteer_hours: 0,
-  });
-
-  if (profileError) throw profileError;
-
-  return {
-    uid: data.user.id,
-    fullName,
-    email,
-    role: 'member',
-    grade: 10,
-    profilePhoto: data.user.user_metadata?.avatar_url ?? '',
-    attendanceCount: 0,
-    volunteerHours: 0,
-    createdAt: new Date().toISOString(),
-  };
 }

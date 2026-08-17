@@ -6,7 +6,6 @@ import {
   registerUser,
   resetPassword,
 } from '../services/authService';
-import { UserRole } from '../types';
 
 export function useAuth() {
   const { session, userProfile, loading, refreshProfile } = useAuthContext();
@@ -30,14 +29,15 @@ export function useAuth() {
     password: string;
     fullName: string;
     grade: number;
-    role?: UserRole;
   }) => {
     setAuthLoading(true);
     setError(null);
     try {
       await registerUser(params);
+      return true;
     } catch (e: any) {
       setError(mapSupabaseError(e.message));
+      return false;
     } finally {
       setAuthLoading(false);
     }

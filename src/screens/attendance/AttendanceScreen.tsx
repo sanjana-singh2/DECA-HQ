@@ -9,6 +9,7 @@ import { getUserAttendanceHistory } from '../../services/attendanceService';
 import { getEventById, getUpcomingEvents as fetchUpcoming } from '../../services/eventsService';
 import { Attendance, Event } from '../../types';
 import AttendanceCard from '../../components/AttendanceCard';
+import { GradientHero } from '../../constants/colors';
 
 export default function AttendanceScreen() {
   const { user, isOfficer } = useAuth();
@@ -36,14 +37,14 @@ export default function AttendanceScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F0E8' }}>
-      <ScrollView style={{ flex: 1 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#756FC9" />}>
+      <ScrollView style={{ flex: 1 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#6495ED" />}>
 
-        <LinearGradient colors={['#D4D3ED', '#C5C8E8', '#CBBFE8']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+        <LinearGradient colors={GradientHero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
           style={{ paddingHorizontal: 24, paddingTop: 24, paddingBottom: 40 }}>
           <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 28, color: '#1A1612', marginBottom: 4 }}>Attendance</Text>
           <View style={{ flexDirection: 'row', alignItems: 'flex-end', marginTop: 12 }}>
             <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 52, color: '#1A1612', lineHeight: 56 }}>{user?.attendanceCount ?? 0}</Text>
-            <Text style={{ color: '#756FC9', fontSize: 13, fontWeight: '500', marginLeft: 10, marginBottom: 8 }}>meetings attended</Text>
+            <Text style={{ color: '#6495ED', fontSize: 13, fontWeight: '500', marginLeft: 10, marginBottom: 8 }}>meetings attended</Text>
           </View>
         </LinearGradient>
 
@@ -55,8 +56,8 @@ export default function AttendanceScreen() {
                 <TouchableOpacity key={event.id}
                   onPress={() => navigation.navigate('QRScanner', { eventId: event.id })}
                   style={{ backgroundColor: '#FDFAF5', borderRadius: 16, padding: 16, marginBottom: 10, flexDirection: 'row', alignItems: 'center' }}>
-                  <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: '#E3E2F5', alignItems: 'center', justifyContent: 'center', marginRight: 14 }}>
-                    <Feather name="camera" size={18} color="#756FC9" />
+                  <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: '#DFE7F6', alignItems: 'center', justifyContent: 'center', marginRight: 14 }}>
+                    <Feather name="camera" size={18} color="#6495ED" />
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={{ color: '#1A1612', fontWeight: '600', fontSize: 14 }}>{event.title}</Text>
@@ -71,7 +72,7 @@ export default function AttendanceScreen() {
           <Text style={{ color: '#1A1612', fontWeight: '600', fontSize: 13, marginBottom: 12, letterSpacing: 0.2 }}>Attendance History</Text>
 
           {loading ? (
-            <ActivityIndicator color="#756FC9" style={{ marginTop: 24 }} />
+            <ActivityIndicator color="#6495ED" style={{ marginTop: 24 }} />
           ) : history.length === 0 ? (
             <View style={{ alignItems: 'center', paddingVertical: 40 }}>
               <Feather name="clipboard" size={36} color="#C4BEB8" style={{ marginBottom: 10 }} />

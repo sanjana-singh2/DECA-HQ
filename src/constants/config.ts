@@ -1,9 +1,3 @@
-export const APP_CONFIG = {
-  name: 'DECA HQ',
-  version: '1.0.0',
-  supportEmail: 'support@decahq.app',
-} as const;
-
 export const CHANNELS = [
   { id: 'announcements',  name: 'Announcements',   icon: 'volume-2',       isAnnouncement: true,  description: 'Official chapter announcements' },
   { id: 'general',        name: 'General',          icon: 'message-circle', isAnnouncement: false, description: 'General discussion' },
@@ -38,17 +32,3 @@ export const DECA_EVENT_CATEGORIES = [
   'Public Speaking',
   'Team Decision Making',
 ] as const;
-
-export const FIRESTORE_COLLECTIONS = {
-  USERS: 'users',
-  EVENTS: 'events',
-  ATTENDANCE: 'attendance',
-  SCORES: 'scores',
-  RESOURCES: 'resources',
-  FORUM_POSTS: 'forumPosts',
-  CHANNELS: 'channels',
-  COMMENTS: 'comments',
-  VOLUNTEER_HOURS: 'volunteerHours',
-  NOTIFICATIONS: 'notifications',
-  ANNOUNCEMENTS: 'announcements',
-} as const;

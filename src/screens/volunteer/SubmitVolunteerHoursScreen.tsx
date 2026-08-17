@@ -18,9 +18,7 @@ import { Feather } from '@expo/vector-icons';
 import { submitVolunteerSchema, SubmitVolunteerFormData } from '../../utils/validators';
 import { submitVolunteerHours, uploadProofImage } from '../../services/volunteerService';
 import { useAuth } from '../../hooks/useAuth';
-
-const LABEL = { color: '#A09A94', fontSize: 11, fontWeight: '600' as const, letterSpacing: 0.8, textTransform: 'uppercase' as const, marginBottom: 8 };
-const INPUT = { backgroundColor: '#FDFAF5', borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 14, color: '#1A1612', fontSize: 14 };
+import { FormLabel as LABEL, FormInput as INPUT } from '../../constants/formStyles';
 
 export default function SubmitVolunteerHoursScreen() {
   const navigation = useNavigation();
@@ -30,7 +28,6 @@ export default function SubmitVolunteerHoursScreen() {
 
   const { control, handleSubmit, formState: { errors } } = useForm<SubmitVolunteerFormData>({
     resolver: zodResolver(submitVolunteerSchema),
-    defaultValues: { hours: 1 },
   });
 
   const pickImage = async () => {
@@ -66,6 +63,13 @@ export default function SubmitVolunteerHoursScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F0E8' }} edges={['bottom']}>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }} keyboardShouldPersistTaps="handled">
+
+        <View style={{ backgroundColor: '#F2F5FA', borderRadius: 14, padding: 14, marginBottom: 20, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <Feather name="info" size={16} color="#6495ED" />
+          <Text style={{ color: '#6495ED', fontSize: 13, fontWeight: '500', flex: 1 }}>
+            Each submission is worth 1 credit.
+          </Text>
+        </View>
 
         {/* Activity Title */}
         <View style={{ marginBottom: 20 }}>
@@ -108,27 +112,6 @@ export default function SubmitVolunteerHoursScreen() {
           />
         </View>
 
-        {/* Hours */}
-        <View style={{ marginBottom: 20 }}>
-          <Text style={LABEL}>Credits (hours)</Text>
-          <Controller
-            control={control}
-            name="hours"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                style={[INPUT, { fontSize: 22, fontWeight: '600', textAlign: 'center' }]}
-                placeholder="2"
-                placeholderTextColor="#C4BEB8"
-                keyboardType="decimal-pad"
-                onBlur={onBlur}
-                onChangeText={v => onChange(parseFloat(v) || 0)}
-                value={value?.toString()}
-              />
-            )}
-          />
-          {errors.hours && <Text style={{ color: '#C96F6F', fontSize: 12, marginTop: 6 }}>{errors.hours.message}</Text>}
-        </View>
-
         {/* Proof Photo */}
         <View style={{ marginBottom: 28 }}>
           <Text style={LABEL}>Proof Photo</Text>
@@ -138,19 +121,19 @@ export default function SubmitVolunteerHoursScreen() {
             style={{
               borderWidth: 1.5,
               borderStyle: 'dashed',
-              borderColor: '#C9C7EB',
+              borderColor: '#CAD9F4',
               borderRadius: 16,
               padding: 24,
               alignItems: 'center',
-              backgroundColor: '#F0EFF9',
+              backgroundColor: '#F2F5FA',
             }}
           >
             {proofUri ? (
               <Image source={{ uri: proofUri }} style={{ width: '100%', height: 160, borderRadius: 12 }} resizeMode="cover" />
             ) : (
               <>
-                <Feather name="camera" size={32} color="#756FC9" style={{ marginBottom: 10 }} />
-                <Text style={{ color: '#756FC9', fontSize: 13, fontWeight: '500', textAlign: 'center' }}>
+                <Feather name="camera" size={32} color="#6495ED" style={{ marginBottom: 10 }} />
+                <Text style={{ color: '#6495ED', fontSize: 13, fontWeight: '500', textAlign: 'center' }}>
                   Tap to upload a photo
                 </Text>
                 <Text style={{ color: '#A09A94', fontSize: 12, textAlign: 'center', marginTop: 4 }}>
@@ -165,7 +148,7 @@ export default function SubmitVolunteerHoursScreen() {
           onPress={handleSubmit(onSubmit)}
           disabled={loading}
           activeOpacity={0.85}
-          style={{ backgroundColor: '#756FC9', borderRadius: 16, paddingVertical: 16, alignItems: 'center' }}
+          style={{ backgroundColor: '#6495ED', borderRadius: 16, paddingVertical: 16, alignItems: 'center' }}
         >
           {loading ? (
             <ActivityIndicator color="#FDFAF5" />

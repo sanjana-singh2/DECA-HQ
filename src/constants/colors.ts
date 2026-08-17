@@ -11,56 +11,50 @@ export const Colors = {
       inverse:   '#FDFAF5',
     },
     accent: {
-      primary:   '#756FC9',
-      secondary: '#908BD4',
+      primary:   '#6495ED',
+      secondary: '#87ADEF',
       success:   '#6FAF8A',
       warning:   '#C9946F',
       danger:    '#C96F6F',
     },
     tab: {
-      active:     '#756FC9',
+      active:     '#6495ED',
       inactive:   '#A09A94',
       background: '#F5F0E8',
     },
   },
   dark: {
-    background: '#1A1820',
-    surface:    '#242230',
-    card:       '#242230',
-    border:     '#32303E',
+    background: '#181B20',
+    surface:    '#222730',
+    card:       '#222730',
+    border:     '#30353E',
     text: {
-      primary:   '#F0EEF8',
-      secondary: '#A09AB8',
-      muted:     '#6B6580',
-      inverse:   '#1A1820',
+      primary:   '#EEF2F8',
+      secondary: '#9AA5B8',
+      muted:     '#656F80',
+      inverse:   '#181B20',
     },
     accent: {
-      primary:   '#908BD4',
-      secondary: '#ADA9DF',
+      primary:   '#87ADEF',
+      secondary: '#ACC5F1',
       success:   '#6FAF8A',
       warning:   '#C9946F',
       danger:    '#C96F6F',
     },
     tab: {
-      active:     '#908BD4',
-      inactive:   '#6B6580',
-      background: '#1A1820',
+      active:     '#87ADEF',
+      inactive:   '#656F80',
+      background: '#181B20',
     },
   },
 } as const;
 
 export const EventTypeColors = {
-  meeting:     '#756FC9',
+  meeting:     '#6495ED',
   competition: '#C96F9A',
   social:      '#6FAF8A',
   deadline:    '#C9946F',
 } as const;
 
-export const RoleColors = {
-  member:  '#A09A94',
-  officer: '#756FC9',
-  advisor: '#6FAF8A',
-} as const;
-
 // Gradient stops for hero sections
-export const GradientHero = ['#D4D3ED', '#C5C8E8', '#CBBFE8'] as const;
+export const GradientHero = ['#D3DCED', '#C5D2E8', '#BFCEE8'] as const;

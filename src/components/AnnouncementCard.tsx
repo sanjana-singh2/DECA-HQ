@@ -14,8 +14,8 @@ export default function AnnouncementCard({ announcement, onPress }: Props) {
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
         {announcement.isPinned && (
-          <View style={{ backgroundColor: '#E3E2F5', borderRadius: 20, paddingHorizontal: 8, paddingVertical: 2, marginRight: 8 }}>
-            <Text style={{ color: '#756FC9', fontSize: 11, fontWeight: '500' }}>Pinned</Text>
+          <View style={{ backgroundColor: '#DFE7F6', borderRadius: 20, paddingHorizontal: 8, paddingVertical: 2, marginRight: 8 }}>
+            <Text style={{ color: '#6495ED', fontSize: 11, fontWeight: '500' }}>Pinned</Text>
           </View>
         )}
         <Text style={{ color: '#C4BEB8', fontSize: 11, marginLeft: 'auto' }}>

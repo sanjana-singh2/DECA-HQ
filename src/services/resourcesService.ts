@@ -1,7 +1,20 @@
+import { Feather } from '@expo/vector-icons';
 import { supabase } from './supabase';
 import { Resource } from '../types';
 
 const BUCKET = 'resources';
+
+export type FileIconName = keyof typeof Feather.glyphMap;
+
+const FILE_ICONS: Record<string, FileIconName> = {
+  pdf: 'file-text', doc: 'file-text', docx: 'file-text',
+  ppt: 'bar-chart-2', pptx: 'bar-chart-2', default: 'file',
+};
+
+export function getResourceFileIcon(fileUrl: string): FileIconName {
+  const ext = fileUrl.split('.').pop()?.toLowerCase() ?? 'default';
+  return FILE_ICONS[ext] ?? FILE_ICONS.default;
+}
 
 function mapResource(row: Record<string, any>): Resource {
   return {

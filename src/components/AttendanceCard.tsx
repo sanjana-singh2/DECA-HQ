@@ -13,8 +13,8 @@ export default function AttendanceCard({ attendance, eventTitle }: Props) {
   const icon = attendance.method === 'qr' ? 'camera' : 'edit-2';
   return (
     <View style={{ backgroundColor: '#FDFAF5', borderRadius: 16, padding: 16, marginBottom: 10, flexDirection: 'row', alignItems: 'center' }}>
-      <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: '#E3E2F5', alignItems: 'center', justifyContent: 'center', marginRight: 14 }}>
-        <Feather name={icon} size={18} color="#756FC9" />
+      <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: '#DFE7F6', alignItems: 'center', justifyContent: 'center', marginRight: 14 }}>
+        <Feather name={icon} size={18} color="#6495ED" />
       </View>
       <View style={{ flex: 1 }}>
         <Text style={{ color: '#1A1612', fontWeight: '600', fontSize: 13, marginBottom: 3 }} numberOfLines={1}>
@@ -24,8 +24,8 @@ export default function AttendanceCard({ attendance, eventTitle }: Props) {
           {formatTimestampWithTime(attendance.timestamp)}
         </Text>
       </View>
-      <View style={{ backgroundColor: '#E3E2F5', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 3 }}>
-        <Text style={{ color: '#756FC9', fontSize: 11, fontWeight: '500', textTransform: 'capitalize' }}>
+      <View style={{ backgroundColor: '#DFE7F6', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 3 }}>
+        <Text style={{ color: '#6495ED', fontSize: 11, fontWeight: '500', textTransform: 'capitalize' }}>
           {attendance.method}
         </Text>
       </View>

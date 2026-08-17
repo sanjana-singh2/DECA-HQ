@@ -17,6 +17,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { AuthStackParamList } from '../../types';
 import { loginSchema, LoginFormData } from '../../utils/validators';
 import { useAuth } from '../../hooks/useAuth';
+import { GradientHero } from '../../constants/colors';
 
 type Nav = NativeStackNavigationProp<AuthStackParamList, 'Login'>;
 
@@ -44,7 +45,7 @@ export default function LoginScreen() {
       >
         {/* Hero gradient */}
         <LinearGradient
-          colors={['#D4D3ED', '#C5C8E8', '#CBBFE8']}
+          colors={GradientHero}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={{ height: 240 }}
@@ -131,14 +132,14 @@ export default function LoginScreen() {
             onPress={() => navigation.navigate('ForgotPassword')}
             style={{ alignSelf: 'flex-end', marginBottom: 28, marginTop: 8 }}
           >
-            <Text style={{ color: '#756FC9', fontSize: 13, fontWeight: '500' }}>Forgot password?</Text>
+            <Text style={{ color: '#6495ED', fontSize: 13, fontWeight: '500' }}>Forgot password?</Text>
           </TouchableOpacity>
 
           {/* Sign in */}
           <TouchableOpacity
             onPress={handleSubmit(onSubmit)}
             disabled={isLoading}
-            style={{ backgroundColor: '#756FC9', borderRadius: 14, paddingVertical: 16, alignItems: 'center', opacity: isLoading ? 0.7 : 1 }}
+            style={{ backgroundColor: '#6495ED', borderRadius: 14, paddingVertical: 16, alignItems: 'center', opacity: isLoading ? 0.7 : 1 }}
           >
             {isLoading
               ? <ActivityIndicator color="#FDFAF5" />
@@ -157,7 +158,7 @@ export default function LoginScreen() {
           <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
             <Text style={{ color: '#A09A94', fontSize: 13 }}>New to DECA HQ? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-              <Text style={{ color: '#756FC9', fontSize: 13, fontWeight: '600' }}>Create an account</Text>
+              <Text style={{ color: '#6495ED', fontSize: 13, fontWeight: '600' }}>Create an account</Text>
             </TouchableOpacity>
           </View>
         </View>

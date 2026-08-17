@@ -29,7 +29,14 @@ export async function recordAttendance(params: {
     .select('id')
     .single();
 
-  if (error) throw error;
+  if (error) {
+    // 23505 = unique_violation on (user_id, event_id) — the pre-check above
+    // has a race window (e.g. a double-tap), so the DB constraint can still
+    // be what actually catches the duplicate. Surface the same friendly
+    // message either way instead of a raw Postgres error string.
+    if (error.code === '23505') throw new Error('Attendance already recorded for this event');
+    throw error;
+  }
 
   // Atomically increment attendance count via RPC
   await supabase.rpc('increment_attendance_count', { p_user_id: params.userId });
@@ -71,6 +78,29 @@ export async function getEventAttendance(eventId: string): Promise<Attendance[]>
 
   if (error) throw error;
   return (data ?? []).map(mapAttendance);
+}
+
+export interface EventAttendee {
+  userId: string;
+  fullName: string;
+  timestamp: string;
+  method: AttendanceMethod;
+}
+
+export async function getEventAttendees(eventId: string): Promise<EventAttendee[]> {
+  const { data, error } = await supabase
+    .from('attendance')
+    .select('user_id, timestamp, method, user:users(full_name)')
+    .eq('event_id', eventId)
+    .order('timestamp', { ascending: true });
+
+  if (error) throw error;
+  return (data ?? []).map((row: any) => ({
+    userId: row.user_id,
+    fullName: row.user?.full_name ?? 'Member',
+    timestamp: row.timestamp,
+    method: row.method,
+  }));
 }
 
 export function generateQRPayload(eventId: string): string {

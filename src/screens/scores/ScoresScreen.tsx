@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
 import { useAuth } from '../../hooks/useAuth';
-import { getUserScores, groupScoresByCategory, calculateAverage } from '../../services/scoresService';
+import { getUserScores, groupScoresByCategory, calculateAverage, deleteScore } from '../../services/scoresService';
 import { Score } from '../../types';
 import { formatTimestamp } from '../../utils/formatters';
+import { GradientHero } from '../../constants/colors';
 
 export default function ScoresScreen() {
   const { user } = useAuth();
@@ -20,33 +21,40 @@ export default function ScoresScreen() {
   useEffect(() => { load().finally(() => setLoading(false)); }, []);
   const onRefresh = async () => { setRefreshing(true); await load(); setRefreshing(false); };
 
+  const handleDelete = (scoreId: string) => {
+    Alert.alert('Delete Score', 'Are you sure you want to remove this score?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Delete', style: 'destructive', onPress: async () => { await deleteScore(scoreId); await load(); } },
+    ]);
+  };
+
   const grouped = groupScoresByCategory(scores);
   const avgScore = calculateAverage(scores);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F0E8' }}>
-      <ScrollView style={{ flex: 1 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#756FC9" />}>
+      <ScrollView style={{ flex: 1 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#6495ED" />}>
 
-        <LinearGradient colors={['#D4D3ED', '#C5C8E8', '#CBBFE8']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+        <LinearGradient colors={GradientHero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
           style={{ paddingHorizontal: 24, paddingTop: 24, paddingBottom: 40 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
             <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 28, color: '#1A1612' }}>My Scores</Text>
             <TouchableOpacity onPress={() => navigation.navigate('AddScore')}
               style={{ backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 8 }}>
-              <Text style={{ color: '#756FC9', fontWeight: '600', fontSize: 13 }}>+ Add</Text>
+              <Text style={{ color: '#6495ED', fontWeight: '600', fontSize: 13 }}>+ Add</Text>
             </TouchableOpacity>
           </View>
           {scores.length > 0 && (
             <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
               <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 52, color: '#1A1612', lineHeight: 56 }}>{avgScore.toFixed(1)}</Text>
-              <Text style={{ color: '#756FC9', fontSize: 13, fontWeight: '500', marginLeft: 10, marginBottom: 8 }}>avg score</Text>
+              <Text style={{ color: '#6495ED', fontSize: 13, fontWeight: '500', marginLeft: 10, marginBottom: 8 }}>avg score</Text>
             </View>
           )}
         </LinearGradient>
 
         <View style={{ paddingHorizontal: 20, marginTop: -20 }}>
           {loading ? (
-            <ActivityIndicator color="#756FC9" style={{ marginTop: 32 }} />
+            <ActivityIndicator color="#6495ED" style={{ marginTop: 32 }} />
           ) : scores.length === 0 ? (
             <View style={{ alignItems: 'center', paddingVertical: 48 }}>
               <Feather name="bar-chart-2" size={36} color="#C4BEB8" style={{ marginBottom: 10 }} />
@@ -54,7 +62,7 @@ export default function ScoresScreen() {
                 No scores recorded yet.{'\n'}Add your first score to track progress!
               </Text>
               <TouchableOpacity onPress={() => navigation.navigate('AddScore')}
-                style={{ marginTop: 20, backgroundColor: '#756FC9', borderRadius: 14, paddingVertical: 13, paddingHorizontal: 28 }}>
+                style={{ marginTop: 20, backgroundColor: '#6495ED', borderRadius: 14, paddingVertical: 13, paddingHorizontal: 28 }}>
                 <Text style={{ color: '#FDFAF5', fontWeight: '600', fontSize: 14 }}>+ Add Score</Text>
               </TouchableOpacity>
             </View>
@@ -69,7 +77,10 @@ export default function ScoresScreen() {
                       <Text style={{ color: '#A09A94', fontSize: 12, marginTop: 2 }}>{formatTimestamp(score.date)}</Text>
                       {score.notes ? <Text style={{ color: '#C4BEB8', fontSize: 11, marginTop: 2 }}>{score.notes}</Text> : null}
                     </View>
-                    <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 26, color: '#756FC9' }}>{score.score}</Text>
+                    <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 26, color: '#6495ED', marginRight: 12 }}>{score.score}</Text>
+                    <TouchableOpacity onPress={() => handleDelete(score.id)} activeOpacity={0.7} hitSlop={8}>
+                      <Feather name="trash-2" size={16} color="#C4BEB8" />
+                    </TouchableOpacity>
                   </View>
                 ))}
               </View>

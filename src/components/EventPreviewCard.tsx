@@ -12,7 +12,7 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 export default function EventPreviewCard({ event, onPress }: Props) {
-  const accent = EventTypeColors[event.type] ?? '#756FC9';
+  const accent = EventTypeColors[event.type] ?? '#6495ED';
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.85}
       style={{ backgroundColor: '#FDFAF5', borderRadius: 16, padding: 16, marginBottom: 10, flexDirection: 'row' }}>
