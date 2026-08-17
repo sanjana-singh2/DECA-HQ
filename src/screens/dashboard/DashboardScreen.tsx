@@ -9,29 +9,20 @@ import { Feather } from '@expo/vector-icons';
 import AnnouncementCard from '../../components/AnnouncementCard';
 import EventPreviewCard from '../../components/EventPreviewCard';
 import QuickActionButton from '../../components/QuickActionButton';
-import { supabase } from '../../services/supabase';
+import { getAnnouncements } from '../../services/announcementsService';
 import { Announcement } from '../../types';
 import { GradientHero } from '../../constants/colors';
 
 export default function DashboardScreen() {
-  const { user } = useAuth();
+  const { user, isOfficer } = useAuth();
   const { events, loading: eventsLoading } = useUpcomingEvents(3);
   const navigation = useNavigation<any>();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchAnnouncements = async () => {
-    const { data } = await supabase
-      .from('announcements')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(3);
-    if (data) {
-      setAnnouncements(data.map(row => ({
-        id: row.id, title: row.title, content: row.content,
-        authorId: row.author_id, createdAt: row.created_at, isPinned: row.is_pinned,
-      })));
-    }
+    const data = await getAnnouncements(3);
+    setAnnouncements(data);
   };
 
   useEffect(() => { fetchAnnouncements(); }, []);
@@ -115,14 +106,21 @@ export default function DashboardScreen() {
           </View>
 
           {/* Announcements */}
-          {announcements.length > 0 && (
+          {announcements.length > 0 || isOfficer ? (
             <View style={{ marginBottom: 24 }}>
-              <Text style={{ color: '#1A1612', fontWeight: '600', fontSize: 13, marginBottom: 12, letterSpacing: 0.2 }}>
-                Announcements
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <Text style={{ color: '#1A1612', fontWeight: '600', fontSize: 13, letterSpacing: 0.2 }}>
+                  Announcements
+                </Text>
+                {isOfficer ? (
+                  <TouchableOpacity onPress={() => navigation.navigate('CreateAnnouncement')}>
+                    <Text style={{ color: '#756FC9', fontSize: 12, fontWeight: '500' }}>+ New</Text>
+                  </TouchableOpacity>
+                ) : null}
+              </View>
               {announcements.map(a => <AnnouncementCard key={a.id} announcement={a} />)}
             </View>
-          )}
+          ) : null}
 
           {/* Upcoming Events */}
           <View>

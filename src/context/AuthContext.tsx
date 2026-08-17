@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '../services/supabase';
 import { getUserProfile } from '../services/authService';
+import { syncPushToken } from '../services/notificationsService';
 import { User } from '../types';
 
 interface AuthContextValue {
@@ -37,6 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         getUserProfile(session.user.id).then(profile => {
           setUserProfile(profile);
           setLoading(false);
+          syncPushToken(session.user.id);
         });
       } else {
         setLoading(false);
@@ -45,11 +47,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (event, session) => {
         setSession(session);
         if (session?.user.id) {
           const profile = await getUserProfile(session.user.id);
           setUserProfile(profile);
+          if (event === 'SIGNED_IN') {
+            syncPushToken(session.user.id);
+          }
         } else {
           setUserProfile(null);
         }

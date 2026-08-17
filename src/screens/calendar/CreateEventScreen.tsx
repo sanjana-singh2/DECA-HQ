@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -10,13 +10,14 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { format } from 'date-fns';
 import { createEventSchema, CreateEventFormData } from '../../utils/validators';
-import { createEvent } from '../../services/eventsService';
+import { createEvent, getEventById, updateEvent } from '../../services/eventsService';
+import { notifyUsers } from '../../services/notificationsService';
 import { useAuth } from '../../hooks/useAuth';
 import { Feather } from '@expo/vector-icons';
 import { EventType } from '../../types';
@@ -32,15 +33,20 @@ const TYPE_ICONS: Record<EventType, keyof typeof Feather.glyphMap> = {
 };
 
 type ActivePicker = 'startTime' | 'endTime' | null;
+type RouteParams = { eventId?: string };
 
 export default function CreateEventScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
+  const route = useRoute<RouteProp<{ params: RouteParams }, 'params'>>();
+  const eventId = route.params?.eventId;
+  const isEditMode = !!eventId;
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [loadingEvent, setLoadingEvent] = useState(isEditMode);
   const [selectedType, setSelectedType] = useState<EventType>('meeting');
   const [activePicker, setActivePicker] = useState<ActivePicker>(null);
 
-  const { control, handleSubmit, formState: { errors } } = useForm<CreateEventFormData>({
+  const { control, handleSubmit, reset, formState: { errors } } = useForm<CreateEventFormData>({
     resolver: zodResolver(createEventSchema),
     defaultValues: {
       type: 'meeting',
@@ -49,24 +55,61 @@ export default function CreateEventScreen() {
     },
   });
 
+  useEffect(() => {
+    if (!eventId) return;
+    getEventById(eventId).then(event => {
+      if (!event) return;
+      setSelectedType(event.type);
+      reset({
+        title: event.title,
+        description: event.description,
+        location: event.location,
+        type: event.type,
+        startTime: new Date(event.startTime),
+        endTime: new Date(event.endTime),
+      });
+    }).finally(() => setLoadingEvent(false));
+  }, [eventId]);
+
   const onSubmit = async (data: CreateEventFormData) => {
     if (!user) return;
     setLoading(true);
     try {
-      await createEvent({
-        ...data,
-        type: selectedType,
-        createdBy: user.uid,
-        description: data.description ?? '',
-        location: data.location ?? '',
-      });
-      Alert.alert('Success', 'Event created!', [{ text: 'OK', onPress: () => navigation.goBack() }]);
+      if (isEditMode && eventId) {
+        await updateEvent(eventId, {
+          title: data.title,
+          description: data.description ?? '',
+          location: data.location ?? '',
+          type: selectedType,
+          startTime: data.startTime.toISOString(),
+          endTime: data.endTime.toISOString(),
+        });
+        Alert.alert('Success', 'Event updated!', [{ text: 'OK', onPress: () => navigation.goBack() }]);
+      } else {
+        await createEvent({
+          ...data,
+          type: selectedType,
+          createdBy: user.uid,
+          description: data.description ?? '',
+          location: data.location ?? '',
+        });
+        notifyUsers({ broadcast: true, title: 'New Event', body: data.title });
+        Alert.alert('Success', 'Event created!', [{ text: 'OK', onPress: () => navigation.goBack() }]);
+      }
     } catch (e: any) {
       Alert.alert('Error', e.message);
     } finally {
       setLoading(false);
     }
   };
+
+  if (loadingEvent) {
+    return (
+      <SafeAreaView style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F5F0E8' }}>
+        <ActivityIndicator color="#756FC9" />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F0E8' }} edges={['bottom']}>
@@ -258,7 +301,9 @@ export default function CreateEventScreen() {
           {loading ? (
             <ActivityIndicator color="#FDFAF5" />
           ) : (
-            <Text style={{ color: '#FDFAF5', fontWeight: '600', fontSize: 15 }}>Create Event</Text>
+            <Text style={{ color: '#FDFAF5', fontWeight: '600', fontSize: 15 }}>
+              {isEditMode ? 'Save Changes' : 'Create Event'}
+            </Text>
           )}
         </TouchableOpacity>
         <View style={{ height: 24 }} />

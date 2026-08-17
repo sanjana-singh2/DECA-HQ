@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { useRoute, RouteProp } from '@react-navigation/native';
+import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
 import { useAuth } from '../../hooks/useAuth';
 import { getChannelPosts, createPost, deletePost } from '../../services/forumService';
@@ -22,6 +22,7 @@ type RouteParams = { channelId: string; channelName: string };
 
 export default function ChannelScreen() {
   const route = useRoute<RouteProp<{ params: RouteParams }, 'params'>>();
+  const navigation = useNavigation<any>();
   const { channelId } = route.params;
   const { user, isOfficer } = useAuth();
   const [posts, setPosts] = useState<ForumPost[]>([]);
@@ -66,7 +67,11 @@ export default function ChannelScreen() {
     const canDelete = isOwn || isOfficer;
     const initial = item.authorName.charAt(0).toUpperCase();
     return (
-      <View style={{ paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#EDE8DF' }}>
+      <TouchableOpacity
+        activeOpacity={0.7}
+        onPress={() => navigation.navigate('PostDetail', { postId: item.id })}
+        style={{ paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#EDE8DF' }}
+      >
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
           <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: '#E3E2F5', alignItems: 'center', justifyContent: 'center', marginRight: 10 }}>
             <Text style={{ color: '#756FC9', fontSize: 14, fontWeight: '700' }}>{initial}</Text>
@@ -76,13 +81,19 @@ export default function ChannelScreen() {
             <Text style={{ color: '#A09A94', fontSize: 11, marginTop: 1 }}>{formatRelativeTime(item.createdAt)}</Text>
           </View>
           {canDelete ? (
-            <TouchableOpacity onPress={() => handleDelete(item.id)} activeOpacity={0.7}>
+            <TouchableOpacity onPress={() => handleDelete(item.id)} activeOpacity={0.7} hitSlop={8}>
               <Text style={{ color: '#C4BEB8', fontSize: 12 }}>Delete</Text>
             </TouchableOpacity>
           ) : null}
         </View>
-        <Text style={{ color: '#1A1612', fontSize: 14, lineHeight: 21, marginLeft: 44 }}>{item.content}</Text>
-      </View>
+        <Text style={{ color: '#1A1612', fontSize: 14, lineHeight: 21, marginLeft: 44, marginBottom: 8 }}>{item.content}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 44, gap: 4 }}>
+          <Feather name="message-circle" size={12} color="#A09A94" />
+          <Text style={{ color: '#A09A94', fontSize: 12 }}>
+            {item.commentCount ?? 0} {item.commentCount === 1 ? 'comment' : 'comments'}
+          </Text>
+        </View>
+      </TouchableOpacity>
     );
   };
 

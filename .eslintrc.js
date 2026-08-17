@@ -1,5 +1,6 @@
 module.exports = {
   root: true,
+  ignorePatterns: ['supabase/functions/**'],
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',

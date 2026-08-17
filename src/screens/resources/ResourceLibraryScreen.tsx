@@ -6,6 +6,7 @@ import { Feather } from '@expo/vector-icons';
 import { getAllResources, filterResources, getResourceFileIcon } from '../../services/resourcesService';
 import { Resource } from '../../types';
 import { RESOURCE_CATEGORIES } from '../../constants/config';
+import { useAuth } from '../../hooks/useAuth';
 
 function ResourceCard({ resource, onPress }: { resource: Resource; onPress: () => void }) {
   const iconName = getResourceFileIcon(resource.fileUrl);
@@ -29,6 +30,7 @@ function ResourceCard({ resource, onPress }: { resource: Resource; onPress: () =
 
 export default function ResourceLibraryScreen() {
   const navigation = useNavigation<any>();
+  const { isOfficer } = useAuth();
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -50,7 +52,18 @@ export default function ResourceLibraryScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F0E8' }}>
       <View style={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 8 }}>
-        <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 30, color: '#1A1612', marginBottom: 16 }}>Resources</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 30, color: '#1A1612' }}>Resources</Text>
+          {isOfficer ? (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('UploadResource')}
+              activeOpacity={0.85}
+              style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: '#756FC9', alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Feather name="plus" size={18} color="#FDFAF5" />
+            </TouchableOpacity>
+          ) : null}
+        </View>
 
         <View style={{ backgroundColor: '#FDFAF5', borderColor: '#EDE8DF', borderWidth: 1, borderRadius: 14, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 11, marginBottom: 14 }}>
           <Feather name="search" size={15} color="#C4BEB8" style={{ marginRight: 10 }} />

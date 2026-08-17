@@ -9,7 +9,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#1a56db"
+      "backgroundColor": "#F5F0E8"
     },
     "ios": {
       "supportsTablet": false,
@@ -22,7 +22,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#1a56db"
+        "backgroundColor": "#E3E2F5"
       },
       "package": "com.decahq.app",
       "permissions": [
@@ -45,7 +45,7 @@
         "expo-notifications",
         {
           "icon": "./assets/notification-icon.png",
-          "color": "#1a56db"
+          "color": "#756FC9"
         }
       ],
       "@react-native-community/datetimepicker"

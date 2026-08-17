@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useAuth } from '../../hooks/useAuth';
 import { getPendingApprovals, approveVolunteerHours, rejectVolunteerHours } from '../../services/volunteerService';
+import { notifyUsers } from '../../services/notificationsService';
 import { VolunteerHour } from '../../types';
 import { formatTimestamp } from '../../utils/formatters';
 
@@ -36,6 +37,11 @@ export default function ApprovalQueueScreen() {
     setProcessing(item.id);
     try {
       await approveVolunteerHours(item.id, item.userId, item.hours, user.uid);
+      notifyUsers({
+        userIds: [item.userId],
+        title: 'Credits Approved',
+        body: `"${item.title}" (${item.hours} credits) was approved.`,
+      });
       await load();
     } catch (e: any) {
       Alert.alert('Error', e.message);
@@ -54,6 +60,11 @@ export default function ApprovalQueueScreen() {
         onPress: async () => {
           setProcessing(item.id);
           await rejectVolunteerHours(item.id, user.uid);
+          notifyUsers({
+            userIds: [item.userId],
+            title: 'Credits Rejected',
+            body: `"${item.title}" was not approved. Check with an officer for details.`,
+          });
           await load();
           setProcessing(null);
         },

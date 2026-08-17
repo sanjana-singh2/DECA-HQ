@@ -123,6 +123,18 @@ CREATE TABLE IF NOT EXISTS public.announcements (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS public.invite_codes (
+  id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  code        TEXT        NOT NULL UNIQUE,
+  role        TEXT        NOT NULL CHECK (role IN ('officer', 'advisor')),
+  max_uses    INTEGER     NOT NULL DEFAULT 1 CHECK (max_uses > 0),
+  use_count   INTEGER     NOT NULL DEFAULT 0,
+  expires_at  TIMESTAMPTZ,
+  revoked     BOOLEAN     NOT NULL DEFAULT FALSE,
+  created_by  UUID        REFERENCES public.users(id) ON DELETE SET NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS public.notifications (
   id             UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
   title          TEXT        NOT NULL,
@@ -257,13 +269,19 @@ CREATE TRIGGER on_auth_user_created
 -- on the users table. RLS policies below only restrict which ROWS a user can
 -- update, not which COLUMNS — without this trigger, "users: can update own
 -- profile" would let any member promote themselves to advisor.
+--
+-- The one sanctioned exception is redeem_invite_code() below, which sets a
+-- transaction-local flag before its role UPDATE. Clients can't set that flag
+-- themselves — they only get PostgREST table/RPC access, never raw SQL — so
+-- this doesn't reopen the self-promotion hole the rest of this trigger closes.
 CREATE OR REPLACE FUNCTION public.enforce_user_profile_update()
 RETURNS TRIGGER
 LANGUAGE PLPGSQL SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  IF public.get_my_role() <> 'advisor' THEN
+  IF public.get_my_role() <> 'advisor'
+     AND current_setting('deca.allow_role_change', TRUE) IS DISTINCT FROM 'true' THEN
     IF NEW.role IS DISTINCT FROM OLD.role
        OR NEW.email IS DISTINCT FROM OLD.email
        OR NEW.attendance_count IS DISTINCT FROM OLD.attendance_count
@@ -272,6 +290,57 @@ BEGIN
     END IF;
   END IF;
   RETURN NEW;
+END;
+$$;
+
+-- Redeems an invite code and promotes the CALLING user (auth.uid()) to the
+-- code's role. Runs as SECURITY DEFINER so it can read invite_codes (which
+-- non-advisors have no SELECT grant on) and write users.role despite the
+-- trigger above — it authorizes that one write via the transaction-local
+-- flag rather than weakening the trigger's normal checks.
+CREATE OR REPLACE FUNCTION public.redeem_invite_code(p_code TEXT)
+RETURNS TEXT
+LANGUAGE PLPGSQL SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_row public.invite_codes%ROWTYPE;
+  v_current_role TEXT;
+  v_rank CONSTANT JSONB := '{"member": 0, "officer": 1, "advisor": 2}'::JSONB;
+BEGIN
+  SELECT * INTO v_row
+  FROM public.invite_codes
+  WHERE code = UPPER(TRIM(p_code)) AND revoked = FALSE
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Invalid or revoked invite code';
+  END IF;
+
+  IF v_row.expires_at IS NOT NULL AND v_row.expires_at < NOW() THEN
+    RAISE EXCEPTION 'This invite code has expired';
+  END IF;
+
+  IF v_row.use_count >= v_row.max_uses THEN
+    RAISE EXCEPTION 'This invite code has already reached its use limit';
+  END IF;
+
+  SELECT role INTO v_current_role FROM public.users WHERE id = auth.uid();
+
+  IF v_current_role IS NULL THEN
+    RAISE EXCEPTION 'No profile found for the current user';
+  END IF;
+
+  IF (v_rank->>v_current_role)::INT >= (v_rank->>v_row.role)::INT THEN
+    RAISE EXCEPTION 'You already have % access or higher', v_current_role;
+  END IF;
+
+  UPDATE public.invite_codes SET use_count = use_count + 1 WHERE id = v_row.id;
+
+  PERFORM set_config('deca.allow_role_change', 'true', TRUE);
+  UPDATE public.users SET role = v_row.role WHERE id = auth.uid();
+
+  RETURN v_row.role;
 END;
 $$;
 
@@ -297,6 +366,7 @@ ALTER TABLE public.resources       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.volunteer_hours ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.announcements   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notifications   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.invite_codes    ENABLE ROW LEVEL SECURITY;
 
 
 -- ============================================================
@@ -464,6 +534,15 @@ CREATE POLICY "notifications: officers can create"
 CREATE POLICY "notifications: users can mark own as read"
   ON public.notifications FOR UPDATE TO authenticated
   USING (target_user_id = auth.uid());
+
+-- INVITE_CODES
+-- Advisors only — members/officers have no SELECT access at all, so codes
+-- can't be browsed or enumerated; the only way to use one is to already
+-- know it and redeem it via redeem_invite_code() above.
+CREATE POLICY "invite_codes: advisors can manage"
+  ON public.invite_codes FOR ALL TO authenticated
+  USING (public.get_my_role() = 'advisor')
+  WITH CHECK (public.get_my_role() = 'advisor');
 
 
 -- ============================================================

@@ -11,6 +11,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { AuthStackParamList } from '../../types';
 import { registerSchema, RegisterFormData } from '../../utils/validators';
 import { useAuth } from '../../hooks/useAuth';
+import { redeemInviteCode } from '../../services/inviteCodeService';
 import { GradientHero } from '../../constants/colors';
 
 type Nav = NativeStackNavigationProp<AuthStackParamList, 'Register'>;
@@ -29,14 +30,28 @@ const inputStyle = {
 
 export default function RegisterScreen() {
   const navigation = useNavigation<Nav>();
-  const { register, isLoading, error } = useAuth();
+  const { register, refreshProfile, isLoading, error } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
 
   const { control, handleSubmit, formState: { errors }, setValue, watch } =
     useForm<RegisterFormData>({
       resolver: zodResolver(registerSchema),
-      defaultValues: { grade: 10, role: 'member' },
+      defaultValues: { grade: 10 },
     });
+
+  const onSubmit = async (data: RegisterFormData) => {
+    const success = await register(data);
+    if (success && data.inviteCode?.trim()) {
+      try {
+        await redeemInviteCode(data.inviteCode);
+        await refreshProfile();
+      } catch {
+        // Account was created fine either way — they can redeem the code
+        // later from Profile once signed in (e.g. if email confirmation
+        // delayed session creation, or the code was mistyped).
+      }
+    }
+  };
 
   const selectedGrade = watch('grade');
 
@@ -150,8 +165,22 @@ export default function RegisterScreen() {
             {errors.confirmPassword ? <Text style={{ color: '#C96F6F', fontSize: 11, marginTop: 4 }}>{errors.confirmPassword.message}</Text> : null}
           </View>
 
+          {/* Invite Code (optional) */}
+          <View style={{ marginBottom: 32 }}>
+            {label('INVITE CODE (OPTIONAL)')}
+            <Controller control={control} name="inviteCode"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput style={inputStyle} placeholder="Got an officer/advisor code? Enter it here"
+                  placeholderTextColor="#C4BEB8" autoCapitalize="characters" autoCorrect={false}
+                  onBlur={onBlur} onChangeText={onChange} value={value} />
+              )} />
+            <Text style={{ color: '#A09A94', fontSize: 11, marginTop: 6 }}>
+              Everyone starts as a member — officers and advisors get access from a code, not by choosing it.
+            </Text>
+          </View>
+
           <TouchableOpacity
-            onPress={handleSubmit(async (data) => { await register(data); })}
+            onPress={handleSubmit(onSubmit)}
             disabled={isLoading}
             style={{ backgroundColor: '#756FC9', borderRadius: 14, paddingVertical: 16, alignItems: 'center', opacity: isLoading ? 0.7 : 1, marginBottom: 20 }}
           >

@@ -47,6 +47,17 @@ export async function createPost(params: {
   return data.id;
 }
 
+export async function getPostById(postId: string): Promise<ForumPost | null> {
+  const { data, error } = await supabase
+    .from('forum_posts')
+    .select('*, author:users(full_name)')
+    .eq('id', postId)
+    .single();
+
+  if (error || !data) return null;
+  return mapPost(data);
+}
+
 export async function getChannelPosts(channelId: string, limitCount = 30): Promise<ForumPost[]> {
   const { data, error } = await supabase
     .from('forum_posts')

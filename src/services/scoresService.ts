@@ -36,6 +36,11 @@ export async function addScore(params: {
   return data.id;
 }
 
+export async function deleteScore(scoreId: string): Promise<void> {
+  const { error } = await supabase.from('scores').delete().eq('id', scoreId);
+  if (error) throw error;
+}
+
 export async function getUserScores(userId: string): Promise<Score[]> {
   const { data, error } = await supabase
     .from('scores')

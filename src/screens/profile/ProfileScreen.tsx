@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../context/ThemeContext';
@@ -24,8 +25,9 @@ function Row({ icon, label, value, onPress, rightEl }: {
 }
 
 export default function ProfileScreen() {
-  const { user, logout, isLoading } = useAuth();
+  const { user, logout, isLoading, isAdvisor } = useAuth();
   const { isDark, setMode } = useTheme();
+  const navigation = useNavigation<any>();
 
   const handleLogout = () => {
     Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
@@ -76,8 +78,25 @@ export default function ProfileScreen() {
             <Switch value={isDark} onValueChange={v => setMode(v ? 'dark' : 'light')}
               trackColor={{ false: '#EDE8DF', true: '#756FC9' }} thumbColor="#FDFAF5" />
           } />
-          <Row icon="bell" label="Notifications" onPress={() => {}} />
+          <Row icon="bell" label="Notifications" onPress={() => navigation.navigate('NotificationSettings')} />
         </View>
+
+        {/* Chapter (advisor only) */}
+        {isAdvisor ? (
+          <View style={{ backgroundColor: '#FDFAF5', marginHorizontal: 20, borderRadius: 16, paddingHorizontal: 16, marginBottom: 12 }}>
+            <Text style={{ color: '#C4BEB8', fontSize: 11, fontWeight: '600', paddingTop: 14, paddingBottom: 4, letterSpacing: 0.8, textTransform: 'uppercase' }}>Chapter</Text>
+            <Row icon="bar-chart-2" label="Analytics" onPress={() => navigation.navigate('Analytics')} />
+            <Row icon="key" label="Invite Codes" onPress={() => navigation.navigate('ManageInviteCodes')} />
+          </View>
+        ) : null}
+
+        {/* Role upgrade (member/officer only — advisors are already top rank) */}
+        {!isAdvisor ? (
+          <View style={{ backgroundColor: '#FDFAF5', marginHorizontal: 20, borderRadius: 16, paddingHorizontal: 16, marginBottom: 12 }}>
+            <Text style={{ color: '#C4BEB8', fontSize: 11, fontWeight: '600', paddingTop: 14, paddingBottom: 4, letterSpacing: 0.8, textTransform: 'uppercase' }}>Access</Text>
+            <Row icon="unlock" label="Redeem Invite Code" onPress={() => navigation.navigate('RedeemInviteCode')} />
+          </View>
+        ) : null}
 
         {/* Account */}
         <View style={{ backgroundColor: '#FDFAF5', marginHorizontal: 20, borderRadius: 16, paddingHorizontal: 16, marginBottom: 20 }}>

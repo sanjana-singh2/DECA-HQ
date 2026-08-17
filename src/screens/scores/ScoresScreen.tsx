@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
 import { useAuth } from '../../hooks/useAuth';
-import { getUserScores, groupScoresByCategory, calculateAverage } from '../../services/scoresService';
+import { getUserScores, groupScoresByCategory, calculateAverage, deleteScore } from '../../services/scoresService';
 import { Score } from '../../types';
 import { formatTimestamp } from '../../utils/formatters';
 import { GradientHero } from '../../constants/colors';
@@ -20,6 +20,13 @@ export default function ScoresScreen() {
   const load = async () => { if (!user) return; const data = await getUserScores(user.uid); setScores(data); };
   useEffect(() => { load().finally(() => setLoading(false)); }, []);
   const onRefresh = async () => { setRefreshing(true); await load(); setRefreshing(false); };
+
+  const handleDelete = (scoreId: string) => {
+    Alert.alert('Delete Score', 'Are you sure you want to remove this score?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Delete', style: 'destructive', onPress: async () => { await deleteScore(scoreId); await load(); } },
+    ]);
+  };
 
   const grouped = groupScoresByCategory(scores);
   const avgScore = calculateAverage(scores);
@@ -70,7 +77,10 @@ export default function ScoresScreen() {
                       <Text style={{ color: '#A09A94', fontSize: 12, marginTop: 2 }}>{formatTimestamp(score.date)}</Text>
                       {score.notes ? <Text style={{ color: '#C4BEB8', fontSize: 11, marginTop: 2 }}>{score.notes}</Text> : null}
                     </View>
-                    <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 26, color: '#756FC9' }}>{score.score}</Text>
+                    <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 26, color: '#756FC9', marginRight: 12 }}>{score.score}</Text>
+                    <TouchableOpacity onPress={() => handleDelete(score.id)} activeOpacity={0.7} hitSlop={8}>
+                      <Feather name="trash-2" size={16} color="#C4BEB8" />
+                    </TouchableOpacity>
                   </View>
                 ))}
               </View>

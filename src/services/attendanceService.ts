@@ -73,6 +73,29 @@ export async function getEventAttendance(eventId: string): Promise<Attendance[]>
   return (data ?? []).map(mapAttendance);
 }
 
+export interface EventAttendee {
+  userId: string;
+  fullName: string;
+  timestamp: string;
+  method: AttendanceMethod;
+}
+
+export async function getEventAttendees(eventId: string): Promise<EventAttendee[]> {
+  const { data, error } = await supabase
+    .from('attendance')
+    .select('user_id, timestamp, method, user:users(full_name)')
+    .eq('event_id', eventId)
+    .order('timestamp', { ascending: true });
+
+  if (error) throw error;
+  return (data ?? []).map((row: any) => ({
+    userId: row.user_id,
+    fullName: row.user?.full_name ?? 'Member',
+    timestamp: row.timestamp,
+    method: row.method,
+  }));
+}
+
 export function generateQRPayload(eventId: string): string {
   return JSON.stringify({ eventId, timestamp: Date.now() });
 }
