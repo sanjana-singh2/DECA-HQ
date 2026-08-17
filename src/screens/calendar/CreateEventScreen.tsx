@@ -106,7 +106,7 @@ export default function CreateEventScreen() {
   if (loadingEvent) {
     return (
       <SafeAreaView style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F5F0E8' }}>
-        <ActivityIndicator color="#756FC9" />
+        <ActivityIndicator color="#6495ED" />
       </SafeAreaView>
     );
   }
@@ -239,7 +239,7 @@ export default function CreateEventScreen() {
                       />
                       {Platform.OS === 'ios' && (
                         <TouchableOpacity onPress={() => setActivePicker(null)} style={{ alignSelf: 'flex-end', marginTop: 4 }}>
-                          <Text style={{ color: '#756FC9', fontSize: 13, fontWeight: '600' }}>Done</Text>
+                          <Text style={{ color: '#6495ED', fontSize: 13, fontWeight: '600' }}>Done</Text>
                         </TouchableOpacity>
                       )}
                     </>
@@ -278,7 +278,7 @@ export default function CreateEventScreen() {
                       />
                       {Platform.OS === 'ios' && (
                         <TouchableOpacity onPress={() => setActivePicker(null)} style={{ alignSelf: 'flex-end', marginTop: 4 }}>
-                          <Text style={{ color: '#756FC9', fontSize: 13, fontWeight: '600' }}>Done</Text>
+                          <Text style={{ color: '#6495ED', fontSize: 13, fontWeight: '600' }}>Done</Text>
                         </TouchableOpacity>
                       )}
                     </>
@@ -296,7 +296,7 @@ export default function CreateEventScreen() {
           onPress={handleSubmit(onSubmit)}
           disabled={loading}
           activeOpacity={0.85}
-          style={{ backgroundColor: '#756FC9', borderRadius: 16, paddingVertical: 16, alignItems: 'center' }}
+          style={{ backgroundColor: '#6495ED', borderRadius: 16, paddingVertical: 16, alignItems: 'center' }}
         >
           {loading ? (
             <ActivityIndicator color="#FDFAF5" />

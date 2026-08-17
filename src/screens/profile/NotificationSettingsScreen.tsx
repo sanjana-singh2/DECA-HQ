@@ -57,17 +57,17 @@ export default function NotificationSettingsScreen() {
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
         <View style={{ backgroundColor: '#FDFAF5', borderRadius: 16, padding: 16 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: '#E3E2F5', alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
-              <Feather name="bell" size={16} color="#756FC9" />
+            <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: '#DFE7F6', alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
+              <Feather name="bell" size={16} color="#6495ED" />
             </View>
             <Text style={{ flex: 1, color: '#1A1612', fontSize: 15, fontWeight: '600' }}>Push Notifications</Text>
             {checking || updating ? (
-              <ActivityIndicator size="small" color="#756FC9" />
+              <ActivityIndicator size="small" color="#6495ED" />
             ) : (
               <Switch
                 value={status === 'granted'}
                 onValueChange={handleToggle}
-                trackColor={{ false: '#EDE8DF', true: '#756FC9' }}
+                trackColor={{ false: '#EDE8DF', true: '#6495ED' }}
                 thumbColor="#FDFAF5"
               />
             )}
@@ -80,10 +80,10 @@ export default function NotificationSettingsScreen() {
         {status === 'denied' ? (
           <TouchableOpacity
             onPress={() => Linking.openSettings()}
-            style={{ marginTop: 12, backgroundColor: '#F0EFF9', borderRadius: 14, padding: 14, flexDirection: 'row', alignItems: 'center' }}
+            style={{ marginTop: 12, backgroundColor: '#F2F5FA', borderRadius: 14, padding: 14, flexDirection: 'row', alignItems: 'center' }}
           >
-            <Feather name="settings" size={14} color="#756FC9" style={{ marginRight: 8 }} />
-            <Text style={{ color: '#756FC9', fontSize: 13, fontWeight: '500', flex: 1 }}>
+            <Feather name="settings" size={14} color="#6495ED" style={{ marginRight: 8 }} />
+            <Text style={{ color: '#6495ED', fontSize: 13, fontWeight: '500', flex: 1 }}>
               Notifications are blocked at the system level. Open Settings to allow them.
             </Text>
           </TouchableOpacity>

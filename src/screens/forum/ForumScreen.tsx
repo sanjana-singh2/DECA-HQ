@@ -23,8 +23,8 @@ export default function ForumScreen() {
               activeOpacity={0.85}
               style={{ backgroundColor: '#FDFAF5', borderRadius: 16, padding: 16, marginBottom: 10, flexDirection: 'row', alignItems: 'center' }}
             >
-              <View style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: '#E3E2F5', alignItems: 'center', justifyContent: 'center', marginRight: 14 }}>
-                <Feather name={item.icon as any} size={20} color="#756FC9" />
+              <View style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: '#DFE7F6', alignItems: 'center', justifyContent: 'center', marginRight: 14 }}>
+                <Feather name={item.icon as any} size={20} color="#6495ED" />
               </View>
               <View style={{ flex: 1 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 3 }}>

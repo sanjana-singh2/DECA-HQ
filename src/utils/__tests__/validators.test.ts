@@ -126,19 +126,23 @@ describe('addScoreSchema', () => {
 });
 
 describe('submitVolunteerSchema', () => {
-  it('accepts a valid submission', () => {
+  it('accepts a valid submission — no hours/quantity field, every entry is worth one credit', () => {
     const result = submitVolunteerSchema.safeParse({
       title: 'Food Drive',
-      hours: 2,
     });
     expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).not.toHaveProperty('hours');
+    }
   });
 
-  it('rejects fewer than 0.5 hours', () => {
-    const result = submitVolunteerSchema.safeParse({
-      title: 'Food Drive',
-      hours: 0,
-    });
+  it('rejects a title shorter than 3 characters', () => {
+    const result = submitVolunteerSchema.safeParse({ title: 'Hi' });
     expect(result.success).toBe(false);
+  });
+
+  it('accepts an optional description', () => {
+    const result = submitVolunteerSchema.safeParse({ title: 'Food Drive', description: 'Packed boxes' });
+    expect(result.success).toBe(true);
   });
 });

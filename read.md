@@ -77,9 +77,9 @@ Text secondary:     #6B6560
 Text muted:         #A09A94
 Text inverse:       #FDFAF5
 
-Accent lavender:    #756FC9   (primary CTA, active states)
-Accent lav light:   #E3E2F5   (icon backgrounds, badges)
-Accent lav faint:   #F0EFF9   (info banners)
+Accent lavender:    #6495ED   (primary CTA, active states)
+Accent lav light:   #DFE7F6   (icon backgrounds, badges)
+Accent lav faint:   #F2F5FA   (info banners)
 
 Success:            #6FAF8A
 Warning:            #C9946F
@@ -88,7 +88,7 @@ Danger:             #C96F6F
 
 Event type colors:
 ```
-meeting:      #756FC9 (lavender)
+meeting:      #6495ED (lavender)
 competition:  #C96F9A (rose)
 social:       #6FAF8A (sage)
 deadline:     #C9946F (amber)
@@ -96,7 +96,7 @@ deadline:     #C9946F (amber)
 
 Gradient hero (used on Dashboard, Attendance, Scores, Resource Detail, Event Detail):
 ```
-['#D4D3ED', '#C5C8E8', '#CBBFE8']   (soft periwinkle sweep)
+['#D3DCED', '#C5D2E8', '#BFCEE8']   (soft periwinkle sweep)
 ```
 
 ## Typography
@@ -112,13 +112,13 @@ Section labels: `fontSize: 11, fontWeight: '600', color: '#A09A94', letterSpacin
 
 Cards: `backgroundColor: '#FDFAF5', borderRadius: 16–20, padding: 16–18` (no border, no shadow)
 
-Primary button: `backgroundColor: '#756FC9', borderRadius: 16, paddingVertical: 16`
+Primary button: `backgroundColor: '#6495ED', borderRadius: 16, paddingVertical: 16`
 
 Danger button: `backgroundColor: '#FEF2F2', borderColor: '#FECACA', borderWidth: 1`
 
 Inputs: `backgroundColor: '#FDFAF5', borderColor: '#EDE8DF', borderWidth: 1, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 14`
 
-Pill/badge: `backgroundColor: '#E3E2F5', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 3` with `color: '#756FC9'`
+Pill/badge: `backgroundColor: '#DFE7F6', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 3` with `color: '#6495ED'`
 
 ---
 
@@ -392,7 +392,7 @@ MainNavigator (Bottom Tabs)
         └── ProfileScreen
 ```
 
-Tab bar: cream background `#F5F0E8`, lavender active `#756FC9`, muted inactive `#A09A94`, no shadow/elevation.
+Tab bar: cream background `#F5F0E8`, lavender active `#6495ED`, muted inactive `#A09A94`, no shadow/elevation.
 
 ---
 

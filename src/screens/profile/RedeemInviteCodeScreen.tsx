@@ -36,8 +36,8 @@ export default function RedeemInviteCodeScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F0E8' }} edges={['bottom']}>
       <View style={{ padding: 20 }}>
         <View style={{ alignItems: 'center', marginBottom: 24, marginTop: 12 }}>
-          <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: '#E3E2F5', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
-            <Feather name="unlock" size={26} color="#756FC9" />
+          <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: '#DFE7F6', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+            <Feather name="unlock" size={26} color="#6495ED" />
           </View>
           <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 22, color: '#1A1612', marginBottom: 6, textAlign: 'center' }}>
             Have an invite code?
@@ -64,7 +64,7 @@ export default function RedeemInviteCodeScreen() {
           activeOpacity={0.85}
           style={{
             marginTop: 20,
-            backgroundColor: code.trim() ? '#756FC9' : '#EDE8DF',
+            backgroundColor: code.trim() ? '#6495ED' : '#EDE8DF',
             borderRadius: 16,
             paddingVertical: 16,
             alignItems: 'center',

@@ -75,31 +75,19 @@ export async function deletePost(postId: string): Promise<void> {
   if (error) throw error;
 }
 
-export async function addReaction(postId: string, emoji: string, userId: string): Promise<void> {
-  const { data } = await supabase
-    .from('forum_posts')
-    .select('reactions')
-    .eq('id', postId)
-    .single();
-
-  const reactions = (data?.reactions ?? {}) as Record<string, string[]>;
-  const users = reactions[emoji] ?? [];
-  if (!users.includes(userId)) {
-    reactions[emoji] = [...users, userId];
-    await supabase.from('forum_posts').update({ reactions }).eq('id', postId);
-  }
+// Both go through the toggle_reaction RPC rather than a client-side
+// read-modify-write: RLS only lets a post's author (or an officer) UPDATE
+// it directly, so reacting to someone else's post would otherwise silently
+// affect zero rows. The RPC also does the read-modify-write atomically,
+// closing a lost-update race between two people reacting at once.
+export async function addReaction(postId: string, emoji: string): Promise<void> {
+  const { error } = await supabase.rpc('toggle_reaction', { p_post_id: postId, p_emoji: emoji, p_add: true });
+  if (error) throw error;
 }
 
-export async function removeReaction(postId: string, emoji: string, userId: string): Promise<void> {
-  const { data } = await supabase
-    .from('forum_posts')
-    .select('reactions')
-    .eq('id', postId)
-    .single();
-
-  const reactions = (data?.reactions ?? {}) as Record<string, string[]>;
-  reactions[emoji] = (reactions[emoji] ?? []).filter(id => id !== userId);
-  await supabase.from('forum_posts').update({ reactions }).eq('id', postId);
+export async function removeReaction(postId: string, emoji: string): Promise<void> {
+  const { error } = await supabase.rpc('toggle_reaction', { p_post_id: postId, p_emoji: emoji, p_add: false });
+  if (error) throw error;
 }
 
 export async function addComment(params: {

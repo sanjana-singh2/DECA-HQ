@@ -30,7 +30,7 @@ export default function ResourceDetailScreen() {
     ]);
   };
 
-  if (loading) return <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F5F0E8' }}><ActivityIndicator color="#756FC9" /></View>;
+  if (loading) return <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F5F0E8' }}><ActivityIndicator color="#6495ED" /></View>;
   if (!resource) return <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F5F0E8' }}><Text style={{ color: '#A09A94', fontSize: 14 }}>Resource not found.</Text></View>;
 
   const iconName = getResourceFileIcon(resource.fileUrl);
@@ -40,11 +40,11 @@ export default function ResourceDetailScreen() {
       <LinearGradient colors={GradientHero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
         style={{ paddingHorizontal: 24, paddingTop: 28, paddingBottom: 36, alignItems: 'flex-start' }}>
         <View style={{ width: 72, height: 72, backgroundColor: 'rgba(255,255,255,0.45)', borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
-          <Feather name={iconName} size={30} color="#756FC9" />
+          <Feather name={iconName} size={30} color="#6495ED" />
         </View>
         <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 26, color: '#1A1612', marginBottom: 8 }}>{resource.title}</Text>
         <View style={{ backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 4 }}>
-          <Text style={{ color: '#756FC9', fontSize: 12, fontWeight: '600' }}>{resource.category}</Text>
+          <Text style={{ color: '#6495ED', fontSize: 12, fontWeight: '600' }}>{resource.category}</Text>
         </View>
       </LinearGradient>
 
@@ -62,7 +62,7 @@ export default function ResourceDetailScreen() {
         </View>
 
         <TouchableOpacity onPress={handleOpen} activeOpacity={0.85}
-          style={{ backgroundColor: '#756FC9', borderRadius: 16, paddingVertical: 16, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: 10 }}>
+          style={{ backgroundColor: '#6495ED', borderRadius: 16, paddingVertical: 16, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: 10 }}>
           <Feather name="external-link" size={16} color="#FDFAF5" />
           <Text style={{ color: '#FDFAF5', fontWeight: '600', fontSize: 15 }}>Open File</Text>
         </TouchableOpacity>

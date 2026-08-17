@@ -106,7 +106,7 @@ export default function CreateAnnouncementScreen() {
             name="isPinned"
             render={({ field: { onChange, value } }) => (
               <Switch value={value} onValueChange={onChange}
-                trackColor={{ false: '#EDE8DF', true: '#756FC9' }} thumbColor="#FDFAF5" />
+                trackColor={{ false: '#EDE8DF', true: '#6495ED' }} thumbColor="#FDFAF5" />
             )}
           />
         </View>
@@ -115,7 +115,7 @@ export default function CreateAnnouncementScreen() {
           onPress={handleSubmit(onSubmit)}
           disabled={loading}
           activeOpacity={0.85}
-          style={{ backgroundColor: '#756FC9', borderRadius: 16, paddingVertical: 16, alignItems: 'center' }}
+          style={{ backgroundColor: '#6495ED', borderRadius: 16, paddingVertical: 16, alignItems: 'center' }}
         >
           {loading ? (
             <ActivityIndicator color="#FDFAF5" />

@@ -67,9 +67,9 @@ export default function AddScoreScreen() {
                     paddingVertical: 13,
                     borderRadius: 14,
                     alignItems: 'center',
-                    backgroundColor: active ? '#756FC9' : '#FDFAF5',
+                    backgroundColor: active ? '#6495ED' : '#FDFAF5',
                     borderWidth: 1,
-                    borderColor: active ? '#756FC9' : '#EDE8DF',
+                    borderColor: active ? '#6495ED' : '#EDE8DF',
                   }}
                 >
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -101,10 +101,10 @@ export default function AddScoreScreen() {
                     paddingVertical: 13,
                     borderBottomWidth: idx < DECA_EVENT_CATEGORIES.length - 1 ? 1 : 0,
                     borderBottomColor: '#EDE8DF',
-                    backgroundColor: active ? '#F0EFF9' : 'transparent',
+                    backgroundColor: active ? '#F2F5FA' : 'transparent',
                   }}
                 >
-                  <Text style={{ fontSize: 13, color: active ? '#756FC9' : '#1A1612', fontWeight: active ? '600' : '400' }}>
+                  <Text style={{ fontSize: 13, color: active ? '#6495ED' : '#1A1612', fontWeight: active ? '600' : '400' }}>
                     {cat}
                   </Text>
                 </TouchableOpacity>
@@ -182,7 +182,7 @@ export default function AddScoreScreen() {
           onPress={handleSubmit(onSubmit)}
           disabled={loading}
           activeOpacity={0.85}
-          style={{ backgroundColor: '#756FC9', borderRadius: 16, paddingVertical: 16, alignItems: 'center' }}
+          style={{ backgroundColor: '#6495ED', borderRadius: 16, paddingVertical: 16, alignItems: 'center' }}
         >
           {loading ? (
             <ActivityIndicator color="#FDFAF5" />

@@ -36,11 +36,11 @@ export default function ApprovalQueueScreen() {
     if (!user) return;
     setProcessing(item.id);
     try {
-      await approveVolunteerHours(item.id, item.userId, item.hours, user.uid);
+      await approveVolunteerHours(item.id, item.userId, user.uid);
       notifyUsers({
         userIds: [item.userId],
         title: 'Credits Approved',
-        body: `"${item.title}" (${item.hours} credits) was approved.`,
+        body: `"${item.title}" was approved — +1 credit.`,
       });
       await load();
     } catch (e: any) {
@@ -77,14 +77,14 @@ export default function ApprovalQueueScreen() {
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ padding: 20 }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#756FC9" />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#6495ED" />}
       >
         <Text style={{ color: '#A09A94', fontSize: 11, fontWeight: '600', letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 16 }}>
           Pending · {items.length}
         </Text>
 
         {loading ? (
-          <ActivityIndicator color="#756FC9" style={{ marginTop: 32 }} />
+          <ActivityIndicator color="#6495ED" style={{ marginTop: 32 }} />
         ) : items.length === 0 ? (
           <View style={{ alignItems: 'center', paddingVertical: 56 }}>
             <Feather name="check-circle" size={40} color="#6FAF8A" style={{ marginBottom: 12 }} />
@@ -108,8 +108,9 @@ export default function ApprovalQueueScreen() {
               ) : null}
 
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 14 }}>
-                <View style={{ backgroundColor: '#E3E2F5', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 4, marginRight: 12 }}>
-                  <Text style={{ color: '#756FC9', fontSize: 12, fontWeight: '600' }}>⭐ {item.hours} credits</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#DFE7F6', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 4, marginRight: 12 }}>
+                  <Feather name="award" size={12} color="#6495ED" style={{ marginRight: 4 }} />
+                  <Text style={{ color: '#6495ED', fontSize: 12, fontWeight: '600' }}>1 credit</Text>
                 </View>
                 <Text style={{ color: '#A09A94', fontSize: 12 }}>{formatTimestamp(item.submittedAt)}</Text>
               </View>

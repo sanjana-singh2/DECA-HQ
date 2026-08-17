@@ -43,7 +43,7 @@ export default function AnalyticsScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F0E8' }} edges={['bottom']}>
       <ScrollView
         style={{ flex: 1 }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#756FC9" />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#6495ED" />}
       >
         <LinearGradient colors={GradientHero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
           style={{ paddingHorizontal: 24, paddingTop: 24, paddingBottom: 40 }}>
@@ -51,7 +51,7 @@ export default function AnalyticsScreen() {
         </LinearGradient>
 
         {loading || !stats ? (
-          <ActivityIndicator color="#756FC9" style={{ marginTop: 32 }} />
+          <ActivityIndicator color="#6495ED" style={{ marginTop: 32 }} />
         ) : (
           <View style={{ paddingHorizontal: 20, marginTop: -24 }}>
             {/* Stat tiles */}
@@ -75,7 +75,7 @@ export default function AnalyticsScreen() {
                 const count = stats.membersByGrade.find(g => g.grade === grade)?.count ?? 0;
                 return (
                   <BarRow key={grade} label={`${grade}th Grade`} value={count} max={maxGradeCount}
-                    color="#756FC9" displayValue={String(count)} />
+                    color="#6495ED" displayValue={String(count)} />
                 );
               })}
             </View>

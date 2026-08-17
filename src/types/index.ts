@@ -85,12 +85,12 @@ export interface Resource {
 
 export type VolunteerStatus = 'pending' | 'approved' | 'rejected';
 
+// Every submission is worth exactly one credit — no variable hours/quantity input.
 export interface VolunteerHour {
   id: string;
   userId: string;
   title: string;
   description?: string;
-  hours: number;
   proofUrl: string;
   status: VolunteerStatus;
   submittedAt: string;

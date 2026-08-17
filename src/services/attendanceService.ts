@@ -29,7 +29,14 @@ export async function recordAttendance(params: {
     .select('id')
     .single();
 
-  if (error) throw error;
+  if (error) {
+    // 23505 = unique_violation on (user_id, event_id) — the pre-check above
+    // has a race window (e.g. a double-tap), so the DB constraint can still
+    // be what actually catches the duplicate. Surface the same friendly
+    // message either way instead of a raw Postgres error string.
+    if (error.code === '23505') throw new Error('Attendance already recorded for this event');
+    throw error;
+  }
 
   // Atomically increment attendance count via RPC
   await supabase.rpc('increment_attendance_count', { p_user_id: params.userId });

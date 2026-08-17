@@ -80,9 +80,9 @@ export default function PostDetailScreen() {
     const reactedUsers = post.reactions?.[emoji] ?? [];
     const hasReacted = reactedUsers.includes(user.uid);
     if (hasReacted) {
-      await removeReaction(post.id, emoji, user.uid);
+      await removeReaction(post.id, emoji);
     } else {
-      await addReaction(post.id, emoji, user.uid);
+      await addReaction(post.id, emoji);
     }
     const updated = await getPostById(postId);
     setPost(updated);
@@ -91,7 +91,7 @@ export default function PostDetailScreen() {
   if (loading) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F5F0E8' }}>
-        <ActivityIndicator color="#756FC9" />
+        <ActivityIndicator color="#6495ED" />
       </View>
     );
   }
@@ -106,8 +106,8 @@ export default function PostDetailScreen() {
         {post ? (
           <View style={{ backgroundColor: '#FDFAF5', borderRadius: 16, padding: 16, marginBottom: 20 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
-              <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: '#E3E2F5', alignItems: 'center', justifyContent: 'center', marginRight: 10 }}>
-                <Text style={{ color: '#756FC9', fontSize: 14, fontWeight: '700' }}>
+              <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: '#DFE7F6', alignItems: 'center', justifyContent: 'center', marginRight: 10 }}>
+                <Text style={{ color: '#6495ED', fontSize: 14, fontWeight: '700' }}>
                   {post.authorName.charAt(0).toUpperCase()}
                 </Text>
               </View>
@@ -133,14 +133,14 @@ export default function PostDetailScreen() {
                       paddingHorizontal: 10,
                       paddingVertical: 5,
                       borderRadius: 14,
-                      backgroundColor: active ? '#E3E2F5' : '#F5F0E8',
+                      backgroundColor: active ? '#DFE7F6' : '#F5F0E8',
                       borderWidth: 1,
-                      borderColor: active ? '#756FC9' : '#EDE8DF',
+                      borderColor: active ? '#6495ED' : '#EDE8DF',
                     }}
                   >
                     <Text style={{ fontSize: 13 }}>{emoji}</Text>
                     {reactedUsers.length > 0 && (
-                      <Text style={{ marginLeft: 4, fontSize: 11, color: active ? '#756FC9' : '#A09A94', fontWeight: '600' }}>
+                      <Text style={{ marginLeft: 4, fontSize: 11, color: active ? '#6495ED' : '#A09A94', fontWeight: '600' }}>
                         {reactedUsers.length}
                       </Text>
                     )}
@@ -168,8 +168,8 @@ export default function PostDetailScreen() {
             return (
               <View key={comment.id} style={{ marginBottom: 16 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
-                  <View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: '#E3E2F5', alignItems: 'center', justifyContent: 'center', marginRight: 10 }}>
-                    <Text style={{ color: '#756FC9', fontSize: 12, fontWeight: '700' }}>
+                  <View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: '#DFE7F6', alignItems: 'center', justifyContent: 'center', marginRight: 10 }}>
+                    <Text style={{ color: '#6495ED', fontSize: 12, fontWeight: '700' }}>
                       {comment.authorName.charAt(0).toUpperCase()}
                     </Text>
                   </View>
@@ -229,7 +229,7 @@ export default function PostDetailScreen() {
             borderRadius: 21,
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: text.trim() ? '#756FC9' : '#EDE8DF',
+            backgroundColor: text.trim() ? '#6495ED' : '#EDE8DF',
           }}
         >
           {posting ? (

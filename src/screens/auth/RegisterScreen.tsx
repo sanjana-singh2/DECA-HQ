@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
-  KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator,
+  KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
@@ -12,6 +12,7 @@ import { AuthStackParamList } from '../../types';
 import { registerSchema, RegisterFormData } from '../../utils/validators';
 import { useAuth } from '../../hooks/useAuth';
 import { redeemInviteCode } from '../../services/inviteCodeService';
+import { supabase } from '../../services/supabase';
 import { GradientHero } from '../../constants/colors';
 
 type Nav = NativeStackNavigationProp<AuthStackParamList, 'Register'>;
@@ -41,15 +42,21 @@ export default function RegisterScreen() {
 
   const onSubmit = async (data: RegisterFormData) => {
     const success = await register(data);
-    if (success && data.inviteCode?.trim()) {
-      try {
-        await redeemInviteCode(data.inviteCode);
-        await refreshProfile();
-      } catch {
-        // Account was created fine either way — they can redeem the code
-        // later from Profile once signed in (e.g. if email confirmation
-        // delayed session creation, or the code was mistyped).
-      }
+    if (!success || !data.inviteCode?.trim()) return;
+
+    // Query the session directly rather than reading it off useAuth() —
+    // the context's session state may not have re-rendered yet this tick.
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) return; // e.g. email confirmation pending — nothing to redeem against yet
+
+    try {
+      await redeemInviteCode(data.inviteCode);
+      await refreshProfile();
+    } catch (e: any) {
+      Alert.alert(
+        'Account Created',
+        `Your account was created, but the invite code couldn't be redeemed: ${e.message}\n\nYou can try again from Profile once you're signed in.`
+      );
     }
   };
 
@@ -70,7 +77,7 @@ export default function RegisterScreen() {
 
         <View style={{ maxWidth: 440, width: '100%', alignSelf: 'center' }} className="px-6 pt-6">
           <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginBottom: 20 }}>
-            <Text style={{ color: '#756FC9', fontSize: 13, fontWeight: '500' }}>← Back to sign in</Text>
+            <Text style={{ color: '#6495ED', fontSize: 13, fontWeight: '500' }}>← Back to sign in</Text>
           </TouchableOpacity>
 
           <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 30, color: '#1A1612', marginBottom: 4 }}>
@@ -120,8 +127,8 @@ export default function RegisterScreen() {
                     onPress={() => setValue('grade', g)}
                     style={{
                       flex: 1, paddingVertical: 12, borderRadius: 12, alignItems: 'center',
-                      backgroundColor: sel ? '#756FC9' : '#FDFAF5',
-                      borderWidth: 1, borderColor: sel ? '#756FC9' : '#EDE8DF',
+                      backgroundColor: sel ? '#6495ED' : '#FDFAF5',
+                      borderWidth: 1, borderColor: sel ? '#6495ED' : '#EDE8DF',
                     }}
                   >
                     <Text style={{ fontSize: 13, fontWeight: '600', color: sel ? '#FDFAF5' : '#6B6560' }}>
@@ -182,7 +189,7 @@ export default function RegisterScreen() {
           <TouchableOpacity
             onPress={handleSubmit(onSubmit)}
             disabled={isLoading}
-            style={{ backgroundColor: '#756FC9', borderRadius: 14, paddingVertical: 16, alignItems: 'center', opacity: isLoading ? 0.7 : 1, marginBottom: 20 }}
+            style={{ backgroundColor: '#6495ED', borderRadius: 14, paddingVertical: 16, alignItems: 'center', opacity: isLoading ? 0.7 : 1, marginBottom: 20 }}
           >
             {isLoading
               ? <ActivityIndicator color="#FDFAF5" />
@@ -193,7 +200,7 @@ export default function RegisterScreen() {
           <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
             <Text style={{ color: '#A09A94', fontSize: 13 }}>Already have an account? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-              <Text style={{ color: '#756FC9', fontSize: 13, fontWeight: '600' }}>Sign in</Text>
+              <Text style={{ color: '#6495ED', fontSize: 13, fontWeight: '600' }}>Sign in</Text>
             </TouchableOpacity>
           </View>
         </View>

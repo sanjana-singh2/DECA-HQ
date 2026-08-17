@@ -87,7 +87,7 @@ export default function QRScannerScreen() {
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           activeOpacity={0.85}
-          style={{ backgroundColor: '#756FC9', borderRadius: 16, paddingVertical: 14, paddingHorizontal: 32 }}
+          style={{ backgroundColor: '#6495ED', borderRadius: 16, paddingVertical: 14, paddingHorizontal: 32 }}
         >
           <Text style={{ color: '#FDFAF5', fontWeight: '600', fontSize: 14 }}>Go Back</Text>
         </TouchableOpacity>

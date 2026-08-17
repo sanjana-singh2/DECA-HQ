@@ -73,8 +73,8 @@ export default function ChannelScreen() {
         style={{ paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#EDE8DF' }}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-          <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: '#E3E2F5', alignItems: 'center', justifyContent: 'center', marginRight: 10 }}>
-            <Text style={{ color: '#756FC9', fontSize: 14, fontWeight: '700' }}>{initial}</Text>
+          <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: '#DFE7F6', alignItems: 'center', justifyContent: 'center', marginRight: 10 }}>
+            <Text style={{ color: '#6495ED', fontSize: 14, fontWeight: '700' }}>{initial}</Text>
           </View>
           <View style={{ flex: 1 }}>
             <Text style={{ color: '#1A1612', fontWeight: '600', fontSize: 13 }}>{item.authorName}</Text>
@@ -105,7 +105,7 @@ export default function ChannelScreen() {
     >
       {loading ? (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <ActivityIndicator color="#756FC9" />
+          <ActivityIndicator color="#6495ED" />
         </View>
       ) : (
         <FlatList
@@ -166,7 +166,7 @@ export default function ChannelScreen() {
               borderRadius: 21,
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: text.trim() ? '#756FC9' : '#EDE8DF',
+              backgroundColor: text.trim() ? '#6495ED' : '#EDE8DF',
             }}
           >
             {posting ? (

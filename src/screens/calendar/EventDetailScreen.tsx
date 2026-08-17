@@ -67,7 +67,7 @@ export default function EventDetailScreen() {
   if (loading) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F5F0E8' }}>
-        <ActivityIndicator color="#756FC9" />
+        <ActivityIndicator color="#6495ED" />
       </View>
     );
   }
@@ -134,7 +134,7 @@ export default function EventDetailScreen() {
               activeOpacity={0.85}
               style={{ backgroundColor: '#FDFAF5', borderRadius: 20, padding: 18, alignItems: 'center' }}
             >
-              <Text style={{ color: '#756FC9', fontWeight: '600', fontSize: 14 }}>
+              <Text style={{ color: '#6495ED', fontWeight: '600', fontSize: 14 }}>
                 {showQR ? 'Hide' : 'Show'} Attendance QR Code
               </Text>
             </TouchableOpacity>
@@ -187,7 +187,7 @@ export default function EventDetailScreen() {
             paddingVertical: 16,
             alignItems: 'center',
             marginBottom: 10,
-            backgroundColor: hasRsvped ? '#FDFAF5' : '#756FC9',
+            backgroundColor: hasRsvped ? '#FDFAF5' : '#6495ED',
             borderWidth: hasRsvped ? 1 : 0,
             borderColor: '#EDE8DF',
           }}

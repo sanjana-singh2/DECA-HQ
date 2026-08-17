@@ -41,8 +41,8 @@ export default function ProfileScreen() {
       <ScrollView style={{ flex: 1 }}>
         {/* Hero */}
         <View style={{ alignItems: 'center', paddingTop: 40, paddingBottom: 28, backgroundColor: '#FDFAF5', marginBottom: 16 }}>
-          <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: '#E3E2F5', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
-            <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 32, color: '#756FC9' }}>
+          <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: '#DFE7F6', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+            <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 32, color: '#6495ED' }}>
               {user?.fullName?.charAt(0) ?? '?'}
             </Text>
           </View>
@@ -50,8 +50,8 @@ export default function ProfileScreen() {
             {user?.fullName ?? '—'}
           </Text>
           <Text style={{ color: '#A09A94', fontSize: 13, marginBottom: 12 }}>{user?.email}</Text>
-          <View style={{ backgroundColor: '#E3E2F5', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 5 }}>
-            <Text style={{ color: '#756FC9', fontSize: 12, fontWeight: '600' }}>
+          <View style={{ backgroundColor: '#DFE7F6', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 5 }}>
+            <Text style={{ color: '#6495ED', fontSize: 12, fontWeight: '600' }}>
               {user?.role ? formatRoleLabel(user.role) : '—'}
             </Text>
           </View>
@@ -76,7 +76,7 @@ export default function ProfileScreen() {
           <Text style={{ color: '#C4BEB8', fontSize: 11, fontWeight: '600', paddingTop: 14, paddingBottom: 4, letterSpacing: 0.8, textTransform: 'uppercase' }}>Preferences</Text>
           <Row icon="moon" label="Dark Mode" rightEl={
             <Switch value={isDark} onValueChange={v => setMode(v ? 'dark' : 'light')}
-              trackColor={{ false: '#EDE8DF', true: '#756FC9' }} thumbColor="#FDFAF5" />
+              trackColor={{ false: '#EDE8DF', true: '#6495ED' }} thumbColor="#FDFAF5" />
           } />
           <Row icon="bell" label="Notifications" onPress={() => navigation.navigate('NotificationSettings')} />
         </View>

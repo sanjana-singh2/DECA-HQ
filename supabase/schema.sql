@@ -100,12 +100,12 @@ CREATE TABLE IF NOT EXISTS public.resources (
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Every row is worth exactly one credit — no variable hours/quantity column.
 CREATE TABLE IF NOT EXISTS public.volunteer_hours (
   id          UUID          PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id     UUID          NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
   title       TEXT          NOT NULL,
   description TEXT,
-  hours       NUMERIC(6,2)  NOT NULL CHECK (hours > 0),
   proof_url   TEXT          NOT NULL DEFAULT '',
   status      TEXT          NOT NULL DEFAULT 'pending'
               CHECK (status IN ('pending','approved','rejected')),
@@ -186,28 +186,28 @@ BEGIN
 END;
 $$;
 
--- Recomputes a user's total approved volunteer hours from the ledger.
--- Only officers/advisors may call it, and the total is derived from
--- public.volunteer_hours rows with status = 'approved' rather than trusting
--- a client-supplied hours value, so it cannot be used to fabricate hours.
-CREATE OR REPLACE FUNCTION public.increment_volunteer_hours(p_user_id UUID, p_hours NUMERIC)
+-- Recomputes a user's total approved credits from the ledger. Only
+-- officers/advisors may call it. Each row is worth exactly one credit, so
+-- the total is a COUNT of public.volunteer_hours rows with status =
+-- 'approved' rather than trusting any client-supplied quantity.
+CREATE OR REPLACE FUNCTION public.increment_volunteer_hours(p_user_id UUID)
 RETURNS VOID
 LANGUAGE PLPGSQL SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
-  v_approved_total NUMERIC;
+  v_approved_count INTEGER;
 BEGIN
   IF public.get_my_role() NOT IN ('officer', 'advisor') THEN
     RAISE EXCEPTION 'Only officers or advisors may approve volunteer hours';
   END IF;
 
-  SELECT COALESCE(SUM(hours), 0) INTO v_approved_total
+  SELECT COUNT(*) INTO v_approved_count
   FROM public.volunteer_hours
   WHERE user_id = p_user_id AND status = 'approved';
 
   UPDATE public.users
-  SET volunteer_hours = v_approved_total
+  SET volunteer_hours = v_approved_count
   WHERE id = p_user_id;
 END;
 $$;
@@ -234,6 +234,52 @@ AS $$
   UPDATE public.forum_posts
   SET comment_count = (SELECT COUNT(*) FROM public.comments WHERE post_id = p_post_id)
   WHERE id = p_post_id;
+$$;
+
+-- Toggles the calling user's own reaction on a post. Runs as SECURITY
+-- DEFINER because "posts: author or officer can update" below only lets the
+-- post's author (or an officer) UPDATE it — without this RPC, reacting to
+-- someone else's post silently updates zero rows. Does the read-modify-write
+-- atomically (row-locked) so two people reacting at once can't clobber each
+-- other's entry, and uses auth.uid() internally rather than a client-passed
+-- id so a caller can only toggle their own reaction.
+CREATE OR REPLACE FUNCTION public.toggle_reaction(p_post_id UUID, p_emoji TEXT, p_add BOOLEAN)
+RETURNS JSONB
+LANGUAGE PLPGSQL SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_reactions JSONB;
+  v_users JSONB;
+  v_uid TEXT := auth.uid()::text;
+BEGIN
+  SELECT reactions INTO v_reactions
+  FROM public.forum_posts
+  WHERE id = p_post_id
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Post not found';
+  END IF;
+
+  v_users := COALESCE(v_reactions->p_emoji, '[]'::jsonb);
+
+  IF p_add THEN
+    IF NOT (v_users @> to_jsonb(v_uid)) THEN
+      v_users := v_users || to_jsonb(v_uid);
+    END IF;
+  ELSE
+    SELECT COALESCE(jsonb_agg(elem), '[]'::jsonb) INTO v_users
+    FROM jsonb_array_elements(v_users) elem
+    WHERE elem <> to_jsonb(v_uid);
+  END IF;
+
+  v_reactions := jsonb_set(COALESCE(v_reactions, '{}'::jsonb), ARRAY[p_emoji], v_users);
+
+  UPDATE public.forum_posts SET reactions = v_reactions WHERE id = p_post_id;
+
+  RETURN v_reactions;
+END;
 $$;
 
 -- Auto-creates a public.users row when a new auth user is created.

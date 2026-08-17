@@ -3,7 +3,6 @@ import {
   View, Text, TextInput, TouchableOpacity,
   KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
@@ -27,8 +26,8 @@ export default function ForgotPasswordScreen() {
   if (sent) {
     return (
       <View style={{ flex: 1, backgroundColor: '#F5F0E8', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 }}>
-        <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: '#E3E2F5', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
-          <Feather name="mail" size={28} color="#756FC9" />
+        <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: '#DFE7F6', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+          <Feather name="mail" size={28} color="#6495ED" />
         </View>
         <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 26, color: '#1A1612', marginBottom: 10, textAlign: 'center' }}>
           Check your inbox
@@ -38,7 +37,7 @@ export default function ForgotPasswordScreen() {
         </Text>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
-          style={{ backgroundColor: '#756FC9', borderRadius: 14, paddingVertical: 16, paddingHorizontal: 40, width: '100%', alignItems: 'center' }}
+          style={{ backgroundColor: '#6495ED', borderRadius: 14, paddingVertical: 16, paddingHorizontal: 40, width: '100%', alignItems: 'center' }}
         >
           <Text style={{ color: '#FDFAF5', fontWeight: '600', fontSize: 15 }}>Back to Sign In</Text>
         </TouchableOpacity>
@@ -54,14 +53,14 @@ export default function ForgotPasswordScreen() {
       <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }} keyboardShouldPersistTaps="handled">
         <View style={{ maxWidth: 440, width: '100%', alignSelf: 'center' }} className="px-6 py-12">
           <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginBottom: 32 }}>
-            <Text style={{ color: '#756FC9', fontSize: 13, fontWeight: '500' }}>← Back to sign in</Text>
+            <Text style={{ color: '#6495ED', fontSize: 13, fontWeight: '500' }}>← Back to sign in</Text>
           </TouchableOpacity>
 
           <Text style={{ fontFamily: 'DMSerifDisplay_400Regular', fontSize: 30, color: '#1A1612', marginBottom: 6 }}>
             Reset your password
           </Text>
           <Text style={{ color: '#A09A94', fontSize: 14, lineHeight: 22, marginBottom: 32 }}>
-            Enter your email and we'll send you a reset link.
+            Enter your email and we&apos;ll send you a reset link.
           </Text>
 
           {error ? (
@@ -94,7 +93,7 @@ export default function ForgotPasswordScreen() {
           <TouchableOpacity
             onPress={handleSubmit(onSubmit)}
             disabled={isLoading}
-            style={{ backgroundColor: '#756FC9', borderRadius: 14, paddingVertical: 16, alignItems: 'center', opacity: isLoading ? 0.7 : 1 }}
+            style={{ backgroundColor: '#6495ED', borderRadius: 14, paddingVertical: 16, alignItems: 'center', opacity: isLoading ? 0.7 : 1 }}
           >
             {isLoading
               ? <ActivityIndicator color="#FDFAF5" />

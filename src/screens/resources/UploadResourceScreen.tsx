@@ -137,11 +137,11 @@ export default function UploadResourceScreen() {
                     paddingVertical: 9,
                     borderRadius: 12,
                     borderWidth: 1.5,
-                    borderColor: active ? '#756FC9' : '#EDE8DF',
-                    backgroundColor: active ? '#F0EFF9' : '#FDFAF5',
+                    borderColor: active ? '#6495ED' : '#EDE8DF',
+                    backgroundColor: active ? '#F2F5FA' : '#FDFAF5',
                   }}
                 >
-                  <Text style={{ fontSize: 12, fontWeight: '500', color: active ? '#756FC9' : '#6B6560' }}>{cat}</Text>
+                  <Text style={{ fontSize: 12, fontWeight: '500', color: active ? '#6495ED' : '#6B6560' }}>{cat}</Text>
                 </TouchableOpacity>
               );
             })}
@@ -158,22 +158,22 @@ export default function UploadResourceScreen() {
             style={{
               borderWidth: 1.5,
               borderStyle: 'dashed',
-              borderColor: '#C9C7EB',
+              borderColor: '#CAD9F4',
               borderRadius: 16,
               padding: 24,
               alignItems: 'center',
-              backgroundColor: '#F0EFF9',
+              backgroundColor: '#F2F5FA',
             }}
           >
             {file ? (
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Feather name={getResourceFileIcon(file.name)} size={22} color="#756FC9" style={{ marginRight: 10 }} />
+                <Feather name={getResourceFileIcon(file.name)} size={22} color="#6495ED" style={{ marginRight: 10 }} />
                 <Text style={{ color: '#1A1612', fontSize: 13, fontWeight: '500' }} numberOfLines={1}>{file.name}</Text>
               </View>
             ) : (
               <>
-                <Feather name="upload" size={28} color="#756FC9" style={{ marginBottom: 10 }} />
-                <Text style={{ color: '#756FC9', fontSize: 13, fontWeight: '500', textAlign: 'center' }}>
+                <Feather name="upload" size={28} color="#6495ED" style={{ marginBottom: 10 }} />
+                <Text style={{ color: '#6495ED', fontSize: 13, fontWeight: '500', textAlign: 'center' }}>
                   Tap to choose a file
                 </Text>
                 <Text style={{ color: '#A09A94', fontSize: 12, textAlign: 'center', marginTop: 4 }}>
@@ -188,7 +188,7 @@ export default function UploadResourceScreen() {
           onPress={handleSubmit(onSubmit)}
           disabled={loading}
           activeOpacity={0.85}
-          style={{ backgroundColor: '#756FC9', borderRadius: 16, paddingVertical: 16, alignItems: 'center' }}
+          style={{ backgroundColor: '#6495ED', borderRadius: 16, paddingVertical: 16, alignItems: 'center' }}
         >
           {loading ? (
             <ActivityIndicator color="#FDFAF5" />

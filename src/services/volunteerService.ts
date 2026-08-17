@@ -9,7 +9,6 @@ function mapVolunteerHour(row: Record<string, any>): VolunteerHour {
     userId: row.user_id,
     title: row.title,
     description: row.description ?? undefined,
-    hours: row.hours,
     proofUrl: row.proof_url,
     status: row.status,
     submittedAt: row.submitted_at,
@@ -45,7 +44,6 @@ export async function submitVolunteerHours(params: {
   userId: string;
   title: string;
   description?: string;
-  hours: number;
   proofUrl: string;
 }): Promise<string> {
   const { data, error } = await supabase
@@ -54,7 +52,6 @@ export async function submitVolunteerHours(params: {
       user_id: params.userId,
       title: params.title,
       description: params.description ?? null,
-      hours: params.hours,
       proof_url: params.proofUrl,
       status: 'pending' as VolunteerStatus,
     })
@@ -90,7 +87,6 @@ export async function getPendingApprovals(): Promise<VolunteerHour[]> {
 export async function approveVolunteerHours(
   hourId: string,
   userId: string,
-  hours: number,
   reviewerId: string
 ): Promise<void> {
   const { error } = await supabase
@@ -104,11 +100,9 @@ export async function approveVolunteerHours(
 
   if (error) throw error;
 
-  // Atomically add hours to the user's total
-  await supabase.rpc('increment_volunteer_hours', {
-    p_user_id: userId,
-    p_hours: hours,
-  });
+  // Atomically recompute the user's total from their approved-row count
+  // (each row is worth exactly one credit)
+  await supabase.rpc('increment_volunteer_hours', { p_user_id: userId });
 }
 
 export async function rejectVolunteerHours(

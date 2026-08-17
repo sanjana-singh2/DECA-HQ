@@ -45,7 +45,6 @@ export const addScoreSchema = z.object({
 export const submitVolunteerSchema = z.object({
   title: z.string().min(3).max(100),
   description: z.string().max(500).optional(),
-  hours: z.number().min(0.5).max(100),
 });
 
 export const uploadResourceSchema = z.object({

@@ -97,7 +97,7 @@ export default function ManageInviteCodesScreen() {
         <TouchableOpacity
           onPress={() => setShowForm(v => !v)}
           activeOpacity={0.85}
-          style={{ backgroundColor: '#756FC9', borderRadius: 16, paddingVertical: 14, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: showForm ? 16 : 24 }}
+          style={{ backgroundColor: '#6495ED', borderRadius: 16, paddingVertical: 14, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: showForm ? 16 : 24 }}
         >
           <Feather name={showForm ? 'x' : 'plus'} size={16} color="#FDFAF5" />
           <Text style={{ color: '#FDFAF5', fontWeight: '600', fontSize: 14 }}>
@@ -118,8 +118,8 @@ export default function ManageInviteCodesScreen() {
                     activeOpacity={0.8}
                     style={{
                       flex: 1, paddingVertical: 12, borderRadius: 12, alignItems: 'center',
-                      backgroundColor: active ? '#756FC9' : '#F5F0E8',
-                      borderWidth: 1, borderColor: active ? '#756FC9' : '#EDE8DF',
+                      backgroundColor: active ? '#6495ED' : '#F5F0E8',
+                      borderWidth: 1, borderColor: active ? '#6495ED' : '#EDE8DF',
                     }}
                   >
                     <Text style={{ fontSize: 13, fontWeight: '600', textTransform: 'capitalize', color: active ? '#FDFAF5' : '#6B6560' }}>
@@ -167,7 +167,7 @@ export default function ManageInviteCodesScreen() {
         ) : null}
 
         {loading ? (
-          <ActivityIndicator color="#756FC9" style={{ marginTop: 32 }} />
+          <ActivityIndicator color="#6495ED" style={{ marginTop: 32 }} />
         ) : codes.length === 0 ? (
           <View style={{ alignItems: 'center', paddingVertical: 48 }}>
             <Feather name="key" size={36} color="#C4BEB8" style={{ marginBottom: 10 }} />
